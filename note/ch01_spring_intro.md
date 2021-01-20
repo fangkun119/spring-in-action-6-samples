@@ -2,7 +2,6 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [CH01 Spring起步](#ch01-spring%E8%B5%B7%E6%AD%A5)
   - [1.1 Spring介绍](#11-spring%E4%BB%8B%E7%BB%8D)
@@ -23,8 +22,6 @@
   - [1.5 小结](#15-%E5%B0%8F%E7%BB%93)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-说明：
 
 > * 本章Demo项目的位置：[../ch01/taco-cloud/](../ch01/taco-cloud/)
 > * 格式形如`1.2.1`的章节序号为原书的章节序号、大部分内容用一两句话简单概括
@@ -106,10 +103,6 @@
 
 ## 1.3 编写Spring应用
 
-> * 测试：
->     * 
->     * [/src/test/java/tacos/HomePageBrowserTest.java](../ch01/taco-cloud/src/test/java/tacos/HomePageBrowserTest.java)
-
 ### 1.3.1 处理Web请求
 
 > 将url映射到Controller的方法，如何在返回值中指定Thymeleaf模板
@@ -122,7 +115,9 @@
 >
 > 代码：[/src/main/resources/templates/home.html](../ch01/taco-cloud/src/main/resources/templates/home.html)
 
-### 1.3.3 测试Controller
+### 1.3.3 测试Controller和Thymeleaf模板
+
+#### (1) 测试Controller
 
 > 代码：[/src/test/java/tacos/HomeControllerTest.java](../ch01/taco-cloud/src/test/java/tacos/HomeControllerTest.java)
 >
@@ -143,6 +138,10 @@
 >   }
 > }
 > ```
+
+#### (2) 测试Thymeleaf模板
+
+> 代码：[/src/test/java/tacos/HomePageBrowserTest.java](/src/test/java/tacos/HomePageBrowserTest.java)
 
 ### 1.3.4 构建和运行
 
