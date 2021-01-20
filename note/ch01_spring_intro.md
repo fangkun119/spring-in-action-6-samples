@@ -2,6 +2,7 @@
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!--**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*-->
 
 - [CH01 Spring起步](#ch01-spring%E8%B5%B7%E6%AD%A5)
   - [1.1 Spring介绍](#11-spring%E4%BB%8B%E7%BB%8D)
@@ -25,7 +26,7 @@
 
 > * 本章Demo项目的位置：[../ch01/taco-cloud/](../ch01/taco-cloud/)
 > * 格式形如`1.2.1`的章节序号为原书的章节序号、大部分内容用一两句话简单概括
-> * 格式形如`(1)/(2)/(3)`的序号为在笔记中重点展开的内容
+> * 格式形如`(1)/(2)/(3)`的序号为在笔记中展开的内容
 
 ## 1.1 Spring介绍
 
@@ -72,12 +73,12 @@
 > 代码（Spring Boot 2.4.1）：[/src/test/.../TacoCloudApplicationTests.java](../ch01/taco-cloud/src/test/java/tacos/TacoCloudApplicationTests.java)
 >
 > ~~~java
-> @SpringBootTest                 // <1>
+> @SpringBootTest                   // <1>
 > public class TacoCloudApplicationTests {
->   @Test                         // <2>
->   public void contextLoads() {
->       // 空白的测试方法虽然没有内容，但它可以检查Spring上下文是否可以成功加载
->   }
+>       @Test                         // <2>
+>       public void contextLoads() {
+>           // 空白的测试方法虽然没有内容，但它可以检查Spring上下文是否可以成功加载
+>       }
 > }
 > ~~~
 >
@@ -89,9 +90,9 @@
 > @RunWith(SpringRunner.class)    // <1>
 > @SpringBootTest                 // <2>
 > public class TacoCloudApplicationTests {
->   @Test                         // <3>
->   public void contextLoads() {
->   }
+>       @Test                       // <3>
+>       public void contextLoads() {
+>       }
 > }
 > // 代码地址：https://github.com/fangkun119/spring-in-action-5-samples/blob/master/ch01/tacos/src/test/java/tacos/TacoCloudApplicationTests.java
 > ~~~
@@ -125,23 +126,60 @@
 > @WebMvcTest(HomeController.class)   // <1> 让测试在Spring MVC的上下文中执行
 > public class HomeControllerTest {
 > 
->   @Autowired
->   private MockMvc mockMvc;   // <2> Mock MVC所需要的服务器
+>       @Autowired
+>       private MockMvc mockMvc;   // <2> Mock MVC所需要的服务器
 > 
->   @Test
->   public void testHomePage() throws Exception {
->     mockMvc.perform(get("/"))    // <3> 发起对"/"的GET请求
->       .andExpect(status().isOk())  // <4> 期望得到HTTP 200
->       .andExpect(view().name("home"))  // <5> 期望得到视图的逻辑名是”home“
->       .andExpect(content().string(           // <6> 期望包含“Welcome to..."
->           containsString("Welcome to...")));
->   }
+>       @Test
+>       public void testHomePage() throws Exception {
+>         mockMvc.perform(get("/"))    // <3> 发起对"/"的GET请求
+>           .andExpect(status().isOk())  // <4> 期望得到HTTP 200
+>           .andExpect(view().name("home"))  // <5> 期望得到视图的逻辑名是”home“
+>           .andExpect(content().string(           // <6> 期望包含“Welcome to..."
+>               containsString("Welcome to...")));
+>       }
 > }
 > ```
 
 #### (2) 测试Thymeleaf模板
 
 > 代码：[/src/test/java/tacos/HomePageBrowserTest.java](/src/test/java/tacos/HomePageBrowserTest.java)
+>
+> ```java
+> // 用随机端口启动Spring容器，触发thymeleaf模板渲染，检查渲染后返回的页面
+> @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+> public class HomePageBrowserTest {
+>   @LocalServerPort
+>   private int port;
+>   private static HtmlUnitDriver browser;
+> 
+>   @BeforeAll
+>   public static void setup() {
+>     browser = new HtmlUnitDriver();
+>     browser.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+>   }
+> 
+>   @AfterAll
+>   public static void teardown() {
+>     browser.quit();
+>   }
+> 
+>   @Test
+>   public void testHomePage() {
+>     // 模板渲染后的页面地址
+>     String homePage = "http://localhost:" + port;
+>     browser.get(homePage);
+>     // 检查title
+>     String titleText = browser.getTitle();
+>     Assertions.assertEquals("Taco Cloud", titleText);
+>     // 检查html中的文字内容
+>     String h1Text = browser.findElementByTagName("h1").getText();
+>     Assertions.assertEquals("Welcome to...", h1Text);
+>     // 检查html中的图片
+>     String imgSrc = browser.findElementByTagName("img").getAttribute("src");
+>     Assertions.assertEquals(homePage + "/images/TacoCloud.png", imgSrc);
+>   }
+> }
+> ```
 
 ### 1.3.4 构建和运行
 
