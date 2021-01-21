@@ -77,13 +77,13 @@
 > ```java
 > @Data
 > public class Ingredient {
->   private final String id;
->   private final String name;
->   private final Type type;
+>       private final String id;
+>       private final String name;
+>       private final Type type;
 >   
->   public enum Type {
->     WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
->   }
+>       public enum Type {
+>            WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
+>       }
 > }
 > ```
 
@@ -91,57 +91,62 @@
 
 > 处理Web页面用的Controller（提供Rest API的Controller见第6章）
 
-#### (1) 代码
+#### (1) 代码：
 
->  [/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
+##### @Controller @RequestMapping @SessionAttributes @ModelAttributes @GetMapping
+
+>  代码：[/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
 >
-> ```java
-> @Slf4j // 为这个类自动生成一个名为log的Logger成员对象
-> @Controller // 是@Component的一个特殊形式，因此也是IOC组件扫描的候选者
-> @RequestMapping("/design") // 作用域这个类的所有方法
-> @SessionAttributes("tacoOrder")
-> public class DesignTacoController {
->     // 将Domain Objects（卷饼材料）添加到model中
->     @ModelAttribute
->     public void addIngredientsToModel(Model model) {
->         List<Ingredient> ingredients = Arrays.asList(
->                 new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
->                 ...
->                 new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
->         );
->         Type[] types = Ingredient.Type.values();
->         for (Type type : types) {
->             model.addAttribute(type.toString().toLowerCase(), filterByType(ingredients, type));
->         }
->     }
-> 
->     private Iterable<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
->         return ingredients
->                 .stream()
->                 .filter(x -> x.getType().equals(type))
->                 .collect(Collectors.toList());
->     }
-> 
->     // 处理"GET /design"请求
->     @GetMapping // 相当于@RequestMapping(method=RequestMethod.GET)
->     public String showDesignForm(Model model) {
->         model.addAttribute("taco", new Taco());
->         return "design"; // 指向名为”design“的thymeleaf模板
->     }
-> 
-> 	// 处理"POST /desgin"请求
->     @PostMapping
->     public String processTaco(@Valid @ModelAttribute("taco") Taco taco, Errors errors) {
->         if (errors.hasErrors()) {
->             return "design";
->         }
->         // Save the taco...
->         // We'll do this in chapter 3
->         log.info("Processing taco: " + taco);
->         return "redirect:/orders/current";
->     }
-> }
-> ```
+>  ```java
+>  @Slf4j // 为这个类自动生成一个名为log的Logger成员对象
+>  @Controller // 是@Component的一个特殊形式，因此也是IOC组件扫描的候选者
+>  @RequestMapping("/design") // 作用域这个类的所有方法
+>  @SessionAttributes("tacoOrder") // 将model中的tocaOrder当做session scope来对待
+>  public class DesignTacoController {
+>      // @ModelAttribute
+>      // 这个方法会在处理请求时被调用，从而将ingredient按照type添加到model中 
+>      @ModelAttribute
+>      public void addIngredientsToModel(Model model) {
+>          List<Ingredient> ingredients = Arrays.asList(
+>               new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
+>               ...
+>               new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
+>          );
+>          Type[] types = Ingredient.Type.values();
+>          for (Type type : types) {
+>               model.addAttribute(type.toString().toLowerCase(), filterByType(ingredients, type));
+>          }
+>      }
+>  
+>      private Iterable<Ingredient> filterByType(List<Ingredient> ingredients, Type type) {
+>          return ingredients
+>               .stream()
+>               .filter(x -> x.getType().equals(type))
+>               .collect(Collectors.toList());
+>      }
+>  
+>      // 处理"GET /design"请求
+>      @GetMapping // 相当于@RequestMapping(method=RequestMethod.GET)
+>      public String showDesignForm(Model model) {
+>          model.addAttribute("taco", new Taco());
+>          return "design"; // 指向名为”design“的thymeleaf模板
+>      }
+>  
+>  	// 处理"POST /desgin"请求
+>      @PostMapping
+>      public String processTaco(@Valid @ModelAttribute("taco") Taco taco, Errors errors) {
+>          if (errors.hasErrors()) {
+>              return "design";
+>          }
+>          // Save the taco...
+>          // We'll do this in chapter 3
+>          log.info("Processing taco: " + taco);
+>          return "redirect:/orders/current";
+>      }
+>  }
+>  ```
+>
+>  关于@SessionAttributes：https://www.baeldung.com/spring-mvc-session-attributes
 
 #### (2) `@Slf4j`
 
@@ -149,7 +154,7 @@
 >
 > ~~~java
 > private static final org.slf4j.Logger log = 
->     org.slf4j.LoggerFactory.getLogger(DesignTacoController.class);
+>        org.slf4j.LoggerFactory.getLogger(DesignTacoController.class);
 > ~~~
 >
 > 添加`@Slf4j`之后，就可以直接调用生成的log对象来打印日志
@@ -218,47 +223,47 @@ Tock订单页面的表单提交
 > // 处理"POST /desgin"请求
 > @PostMapping
 > public String processTaco(
->     // 将thymeleaf模板中的`th:object="${taco}"`绑定到Model对象`Taco taco`上
->     // 而thymeleaf模板中对"${taco}"属性的使用，也与Domain Object Taco的属性一一对应
->     @Valid @ModelAttribute("taco") Taco taco, 
->     Errors errors) {
->   if (errors.hasErrors()) {
->     return "design";
->   }
->   // Save the taco...
->   // We'll do this in chapter 3
->   log.info("Processing taco: " + taco);
->   // 加上"redirect:“前缀表示将触发浏览器重定向
->   // 将会由负责该url的OrderController.orderForm方法来处理
->   return "redirect:/orders/current";
+>             // @ModelAttribute("taco")：
+>             //     将thymeleaf模板中的`th:object="${taco}"`绑定到Model对象`Taco taco`上
+>             //     而thymeleaf模板中对"${taco}"属性的使用，也与Domain Object Taco的属性一一对应
+>             @Valid @ModelAttribute("taco") Taco taco, 
+>            Errors errors) {
+>        if (errors.hasErrors()) {
+>           return "design";
+>       }
+>       // Save the taco...
+>       // We'll do this in chapter 3
+>       log.info("Processing taco: " + taco);
+>       // 加上"redirect:“前缀表示将触发浏览器重定向
+>       // 将会由负责该url的OrderController.orderForm方法来处理
+>     return "redirect:/orders/current";
 > }
-> ```
->
-> 完整代码：[/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
->
+>```
+> 
+>完整代码：[/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
+> 
 > ```java
 > @Slf4j
 > @Controller
 > @RequestMapping("/orders")
-> public class OrderController {
->   // 处理”GET /orders/current"请求的方法
->   @GetMapping("/current")
->   public String orderForm(Model model) {
->     model.addAttribute("tacoOrder", new TacoOrder());
->     // 对应的thymeleaf模板为orderForm
->     return "orderForm";
->   }
-> 
->   // 处理“POST /orders"请求的方法
->   @PostMapping
->   public String processOrder(@Valid TacoOrder order, Errors errors) {
->     // 
->     if (errors.hasErrors()) {
->       return "orderForm";
+>   public class OrderController {
+>       // 处理”GET /orders/current"请求的方法
+>       @GetMapping("/current")
+>        public String orderForm(Model model) {
+>            model.addAttribute("tacoOrder", new TacoOrder());
+>            // 对应的thymeleaf模板为orderForm
+>           return "orderForm";
 >     }
->     log.info("Order submitted: " + order);
->     return "redirect:/";
->   }
+>   
+>       // 处理“POST /orders"请求的方法
+>       @PostMapping
+>        public String processOrder(@Valid TacoOrder order, Errors errors) {
+>            if (errors.hasErrors()) {
+>                return "orderForm";
+>            }
+>            log.info("Order submitted: " + order);
+>            return "redirect:/";
+>       }
 > }
 > ```
 >
@@ -283,30 +288,29 @@ Tock订单页面的表单提交
 > ```java
 > @Data
 > public class TacoOrder {
->   @NotBlank(message="Delivery name is required")
->   private String deliveryName;
+>       @NotBlank(message="Delivery name is required")
+>       private String deliveryName;
 > 
->   ...
+>       ...
 > 
->   @CreditCardNumber(message="Not a valid credit card number")
->   private String ccNumber;
+>       @CreditCardNumber(message="Not a valid credit card number")
+>       private String ccNumber;
 > 
->   @Pattern(regexp="^(0[1-9]|1[0-2])([\\/])([1-9][0-9])$",
->            message="Must be formatted MM/YY")
->   private String ccExpiration;
-> 
->   @Digits(integer=3, fraction=0, message="Invalid CVV")
->   private String ccCVV;
-> 
->   ...
-> }
+>       @Pattern(regexp="^(0[1-9]|1[0-2])([\\/])([1-9][0-9])$",message="Must be formatted MM/YY")
+>        private String ccExpiration;
+>   
+>     @Digits(integer=3, fraction=0, message="Invalid CVV")
+>       private String ccCVV;
+>   
+>     ...
+>   }
 > ```
->
-> 完整代码：
->
-> * [/src/main/java/.../Taco.java](../ch02/taco-cloud/src/main/java/tacos/Taco.java)
->
-> * [/src/main/java/.../TacoOrder.java](../ch02/taco-cloud/src/main/java/tacos/TacoOrder.java)
+> 
+>完整代码：
+> 
+>* [/src/main/java/.../Taco.java](../ch02/taco-cloud/src/main/java/tacos/Taco.java)
+> 
+>* [/src/main/java/.../TacoOrder.java](../ch02/taco-cloud/src/main/java/tacos/TacoOrder.java)
 
 #### (2) 常用注解
 
@@ -319,23 +323,22 @@ Tock订单页面的表单提交
 > ```java
 > @PostMapping
 > public String processTaco(
->     // @Valid表示对taco对象进行参数校验，校验规则注解在Taco类的代码中
->     // 如果校验通过，`errors.hasErrors()`将为false
->     // 如果校验错误，`errors.hasErrors()`为true，并且表单视图可以知道具体的错误以便提示用户
->     @Valid @ModelAttribute("taco") Taco taco, 
->     Errors errors) {
->   if (errors.hasErrors()) {
->     return "design";
+>        // @Valid表示对taco对象进行参数校验，校验规则注解在Taco类的代码中
+>        // 如果校验通过，`errors.hasErrors()`将为false
+>        // 如果校验错误，`errors.hasErrors()`为true，并且表单视图可以知道具体的错误以便提示用户
+>        @Valid @ModelAttribute("taco") Taco taco, Errors errors) {
+>            if (errors.hasErrors()) {
+>           return "design";
+>        }
+>   
+>       ...
+>   
+>       log.info("Processing taco: " + taco);
+>       return "redirect:/orders/current";
 >   }
->   
->   ...
->   
->   log.info("Processing taco: " + taco);
->   return "redirect:/orders/current";
-> }
 > ```
->
-> 完整代码：[/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
+> 
+>完整代码：[/src/main/java/.../DesignTacoController.java](../ch02/taco-cloud/src/main/java/tacos/web/DesignTacoController.java)
 
 ### 2.3.3 展现校验错误
 
@@ -361,8 +364,8 @@ Tock订单页面的表单提交
 ><input type="text" th:field="*{ccNumber}"/>
 ><!--当ccNumber格式错误时、渲染一个span来提示错误，并用后端传来的message替换占位符CC Num Error-->
 ><span class="validationError"
->      th:if="${#fields.hasErrors('ccNumber')}"
->      th:errors="*{ccNumber}">CC Num Error</span>
+>         th:if="${#fields.hasErrors('ccNumber')}"
+>         th:errors="*{ccNumber}">CC Num Error</span>
 ><br/>
 >```
 >
@@ -388,12 +391,12 @@ Tock订单页面的表单提交
 > // WebMvcConfigurer接口为配置Spring MVC的方法提供了默认实现，实现该接口后只需要覆盖所需的方法即可
 > @Configuration
 > public class WebConfig implements WebMvcConfigurer { 
->   @Override
->   public void addViewControllers(ViewControllerRegistry registry) {
->     // 将对uri "/"的请求转发到视图"home"
->     // 对应的thymeleaf模板为/src/main/resources/templates/home.html
->     registry.addViewController("/").setViewName("home");
->   }
+>       @Override
+>       public void addViewControllers(ViewControllerRegistry registry) {
+>            // 将对uri "/"的请求转发到视图"home"
+>            // 对应的thymeleaf模板为/src/main/resources/templates/home.html
+>            registry.addViewController("/").setViewName("home");
+>       }
 > }
 > ```
 
@@ -402,16 +405,16 @@ Tock订单页面的表单提交
 > ```java
 > @WebMvcTest // <1>与普通Controller的测试类相比，不需要@WebMvcTest(HomeController.class)，注解参数留空
 > public class HomeControllerTest {
->   @Autowired
->   private MockMvc mockMvc;   // <2> Mock MVC所需要的服务器
+>     @Autowired
+>     private MockMvc mockMvc;   // <2> Mock MVC所需要的服务器
 > 
->   @Test
->   public void testHomePage() throws Exception {
+>     @Test
+>     public void testHomePage() throws Exception {
 >     mockMvc.perform(get("/"))    // <3> 发起对"/"的GET请求
->       .andExpect(status().isOk())  // <4> 期望得到HTTP 200
->       .andExpect(view().name("home"))  // <5> 期望得到视图的逻辑名是”home“
->       .andExpect(content().string(containsString("Welcome to..."))); // <6> 期望包含“Welcome to..."
->   }
+>        .andExpect(status().isOk())  // <4> 期望得到HTTP 200
+>        .andExpect(view().name("home"))  // <5> 期望得到视图的逻辑名是”home“
+>        .andExpect(content().string(containsString("Welcome to..."))); // <6> 期望包含“Welcome to..."
+>     }
 > }
 > ```
 
