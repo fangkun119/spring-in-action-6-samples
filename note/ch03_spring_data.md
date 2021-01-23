@@ -38,7 +38,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-> * 格式形如`1.2.1`的章节序号为原书的章节序号、大部分内容用一两句话简单概括
+> * 格式形如`1.2.1`的章节序号为原书的章节序号
 > * 格式形如`(1)/(2)/(3)`的章节序号为在笔记中展开的内容
 
 # CH03 使用数据
@@ -84,9 +84,9 @@
 >
 > ~~~java
 > public interface IngredientRepository {
->   Iterable<Ingredient> findAll();
->   Optional<Ingredient> findById(String id);
->   Ingredient save(Ingredient ingredient);
+>       Iterable<Ingredient> findAll();
+>       Optional<Ingredient> findById(String id);
+>       Ingredient save(Ingredient ingredient);
 > }
 > ~~~
 >
@@ -95,38 +95,38 @@
 > ```java
 > @Repository // 可以被Spring当做DAO来加载到Spring上下文中
 > public class JdbcIngredientRepository implements IngredientRepository { 
->    private JdbcTemplate jdbcTemplate;
+>        private JdbcTemplate jdbcTemplate;
 >     
->    @Autowired //注入JdbcTemplate
->    public JdbcIngredientRepository(JdbcTemplate jdbcTemplate) {
->       this.jdbcTemplate = jdbcTemplate;
->    }
+>        @Autowired //注入JdbcTemplate
+>        public JdbcIngredientRepository(JdbcTemplate jdbcTemplate) {
+>           this.jdbcTemplate = jdbcTemplate;
+>        }
 >    
->    @Override
->    public Optional<Ingredient> findById(String id) {
->       List<Ingredient> results = jdbcTemplate.query(
->           "select id, name, type from Ingredient where id=?",
->           this::mapRowToIngredient, /*用lambda表达式实现函数式接口RowMapper<Ingredient>*/ 
->           id /*与SQL中的?相对应*/);
->       return results.size() == 0 ?  Optional.empty() :  Optional.of(results.get(0));
->    }
+>        @Override
+>        public Optional<Ingredient> findById(String id) {
+>           List<Ingredient> results = jdbcTemplate.query(
+>               "select id, name, type from Ingredient where id=?",
+>               this::mapRowToIngredient, /*用lambda表达式实现函数式接口RowMapper<Ingredient>*/ 
+>               id /*与SQL中的?相对应*/);
+>           return results.size() == 0 ?  Optional.empty() :  Optional.of(results.get(0));
+>        }
 > 
->    private Ingredient mapRowToIngredient(ResultSet row, int rowNum) throws SQLException{
->       return new Ingredient(
->           row.getString("id"),  row.getString("name"),
->           Ingredient.Type.valueOf(row.getString("type")));
->    }
+>        private Ingredient mapRowToIngredient(ResultSet row, int rowNum) throws SQLException{
+>           return new Ingredient(
+>               row.getString("id"),  row.getString("name"),
+>               Ingredient.Type.valueOf(row.getString("type")));
+>        }
 >     
->    @Override
->    public Ingredient save(Ingredient ingredient) {
->       // insert数据的方法: (1)直接用update()方法；(2)使用SimpleJdbcInsert包装器类
->       jdbcTemplate.update(
->          "insert into Ingredient (id, name, type) values (?, ?, ?)",
->          ingredient.getId(),
->          ingredient.getName(),
->          ingredient.getType().toString());
->       return ingredient;
->    }
+>        @Override
+>        public Ingredient save(Ingredient ingredient) {
+>           // insert数据的方法: (1)直接用update()方法；(2)使用SimpleJdbcInsert包装器类
+>           jdbcTemplate.update(
+>              "insert into Ingredient (id, name, type) values (?, ?, ?)",
+>              ingredient.getId(),
+>              ingredient.getName(),
+>              ingredient.getType().toString());
+>           return ingredient;
+>        }
 > }
 > ```
 
@@ -139,15 +139,15 @@
 > @RequestMapping("/design")
 > @SessionAttributes("tacoOrder")
 > public class DesignTacoController {
->     private final IngredientRepository ingredientRepo;
+>         private final IngredientRepository ingredientRepo;
 > 
->     @Autowired
->     public DesignTacoController(
->             IngredientRepository ingredientRepo) {
->         this.ingredientRepo = ingredientRepo;
->     }
+>         @Autowired
+>         public DesignTacoController(
+>                 IngredientRepository ingredientRepo) {
+>             this.ingredientRepo = ingredientRepo;
+>         }
 >     
->     ...
+>         ...
 > }
 > ```
 
@@ -183,8 +183,8 @@
 > @Override
 > @Transactional  // 在一个事务中运行 
 > public TacoOrder save(TacoOrder order) {
->     // Prepared Statement Factory
->     PreparedStatementCreatorFactory pscf =
+>     	// Prepared Statement Factory
+>     	PreparedStatementCreatorFactory pscf =
 >             new PreparedStatementCreatorFactory(
 >                     "insert into Taco_Order "
 >                             + "(delivery_name, delivery_street, delivery_city, "
@@ -250,33 +250,33 @@
 > //@SessionAttributes("tacoOrder")让名为”tacoOrder“的model对象保存在session中
 > @SessionAttributes("tacoOrder") 
 > public class DesignTacoController {
->     // 通过@Autoware注入DAO
->     private final IngredientRepository ingredientRepo;
->     @Autowired
->     public DesignTacoController(IngredientRepository ingredientRepo) {
->         this.ingredientRepo = ingredientRepo;
->     }
-> 
->     // @ModelAttribute确保在model中会创建名为tacoOrder的TacoOrder对象
->     @ModelAttribute(name = "tacoOrder")
->     public TacoOrder order() {
->         return new TacoOrder();
->     }
->     
->     @PostMapping
->     public String processTaco(
->             @Valid Taco taco, Errors errors,
->             // @ModelAttribute表示该对象来自于model，不需要绑定其他对象
->             @ModelAttribute TacoOrder tacoOrder, 
->         	Model model) {
->         if (errors.hasErrors()) {
->             return "design";
+>         // 通过@Autoware注入DAO
+>         private final IngredientRepository ingredientRepo;
+>         @Autowired
+>         public DesignTacoController(IngredientRepository ingredientRepo) {
+>             this.ingredientRepo = ingredientRepo;
 >         }
->         tacoOrder.addTaco(taco);
->         return "redirect:/orders/current";
->     }
+> 
+>         // @ModelAttribute确保在model中会创建名为tacoOrder的TacoOrder对象
+>         @ModelAttribute(name = "tacoOrder")
+>         public TacoOrder order() {
+>             return new TacoOrder();
+>         }
 >     
->     ...
+>         @PostMapping
+>         public String processTaco(
+>                 @Valid Taco taco, Errors errors,
+>                 // @ModelAttribute表示该对象来自于model，不需要绑定其他对象
+>                 @ModelAttribute TacoOrder tacoOrder, 
+>                Model model) {
+>             if (errors.hasErrors()) {
+>                 return "design";
+>             }
+>             tacoOrder.addTaco(taco);
+>             return "redirect:/orders/current";
+>         }
+>     
+>         ...
 > }
 > ~~~
 
@@ -313,27 +313,26 @@
 >
 > ```java
 > // 第二个泛型参数对应于TacoOrder的id字段的类型（使用@Id注解）
-> public interface OrderRepository extends CrudRepository<TacoOrder, Long> {
-> }
+> public interface OrderRepository extends CrudRepository<TacoOrder, Long> {}
 > ```
->
-> CrudRepository继承自Repository接口，为其添加了如下方法
->
-> ```java
+> 
+>CrudRepository继承自Repository接口，为其添加了如下方法
+> 
+>```java
 > @NoRepositoryBean
 > public interface CrudRepository<T, ID> extends Repository<T, ID> {
->     <S extends T> S save(S var1);
->     <S extends T> Iterable<S> saveAll(Iterable<S> var1);
->     Optional<T> findById(ID var1);
->     boolean existsById(ID var1);
->     Iterable<T> findAll();
->     Iterable<T> findAllById(Iterable<ID> var1);
->     long count();
->     void deleteById(ID var1);
->     void delete(T var1);
->     void deleteAll(Iterable<? extends T> var1);
->     void deleteAll();
-> }
+>      <S extends T> S save(S var1);
+>         <S extends T> Iterable<S> saveAll(Iterable<S> var1);
+>         Optional<T> findById(ID var1);
+>         boolean existsById(ID var1);
+>         Iterable<T> findAll();
+>         Iterable<T> findAllById(Iterable<ID> var1);
+>         long count();
+>         void deleteById(ID var1);
+>         void delete(T var1);
+>         void deleteAll(Iterable<? extends T> var1);
+>         void deleteAll();
+>    }
 > ```
 
 ### 3.2.3 添加注解用于Domain Object持久化
@@ -361,25 +360,25 @@
 > @EqualsAndHashCode(exclude = "createdAt") // lambok注解，见顶部的说明
 > @Table // 可选注解，用来指定DB表名：默认与类名相同，也可指定其他表例如@Table("Taco_Cloud_Taco")
 > public class Taco {
->     // @Id表名该列是CrudRepository<T, ID>中泛型参数ID所对应的property
->     @Id  
->     private Long id;
+>         // @Id表名该列是CrudRepository<T, ID>中泛型参数ID所对应的property
+>         @Id  
+>         private Long id;
 > 
->     // 所有属性都默认映射到数据库中名称相对应的列（驼峰 -> 小写用下划线分隔单词）
->     // 也可以使用注解指定列名，例如@Column("create_at")
->     private Date createdAt = new Date();
+>         // 所有属性都默认映射到数据库中名称相对应的列（驼峰 -> 小写用下划线分隔单词）
+>         // 也可以使用注解指定列名，例如@Column("create_at")
+>         private Date createdAt = new Date();
 > 
->     // 还可以添加java validation的注解，用于数据校验
->     @NotNull
->     @Size(min = 5, message = "Name must be at least 5 characters long")
->     private String name;
+>         // 还可以添加java validation的注解，用于数据校验
+>         @NotNull
+>         @Size(min = 5, message = "Name must be at least 5 characters long")
+>         private String name;
 > 
->     @Size(min = 1, message = "You must choose at least 1 ingredient")
->     private List<IngredientRef> ingredients = new ArrayList<>();
+>         @Size(min = 1, message = "You must choose at least 1 ingredient")
+>         private List<IngredientRef> ingredients = new ArrayList<>();
 > 
->     public void addIngredient(Ingredient taco) {
->         this.ingredients.add(new IngredientRef(taco.getId()));
->     }
+>         public void addIngredient(Ingredient taco) {
+>             this.ingredients.add(new IngredientRef(taco.getId()));
+>         }
 > }
 > ```
 >
@@ -387,7 +386,7 @@
 > // 对应的表名是ingredient_ref，并且该表没有ID列，因此也可以不加注解
 > @Data
 > public class IngredientRef {
->   private final String ingredient;
+>       private final String ingredient;
 > }
 > ```
 
@@ -400,13 +399,13 @@
 > @RequestMapping("/design")
 > @SessionAttributes("tacoOrder")
 > public class DesignTacoController {
-> 	// 使用@Autowired注入
->     private final IngredientRepository ingredientRepo;
->     @Autowired
->     public DesignTacoController(IngredientRepository ingredientRepo) {
->         this.ingredientRepo = ingredientRepo;
->     }
->     ...
+>     // 使用@Autowired注入
+>        private final IngredientRepository ingredientRepo;
+>        @Autowired
+>        public DesignTacoController(IngredientRepository ingredientRepo) {
+>             this.ingredientRepo = ingredientRepo;
+>        }
+>        ...
 > }
 > ```
 
@@ -456,14 +455,14 @@
 > // 并强制（force）所有字段被初始化为0/null/false
 > @NoArgsConstructor(access=AccessLevel.PRIVATE, force=true) 
 > public class Ingredient {
->   @Id //数据库table中表示id的列
->   private String id;
+>       @Id //数据库table中表示id的列
+>       private String id;
 >   
->   private String name;
->   private Type type;
->   public static enum Type {
->     WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
->   }
+>       private String name;
+>       private Type type;
+>       public static enum Type {
+>    		WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
+>       }
 > }
 > ~~~
 >
@@ -473,19 +472,19 @@
 > @Data
 > @Entity
 > public class Taco {
->   // 使用Database的ID自增所产生的值
->   @Id
->   @GeneratedValue(strategy = GenerationType.AUTO) 
->   private Long id;
+>       // 使用Database的ID自增所产生的值
+>       @Id
+>       @GeneratedValue(strategy = GenerationType.AUTO) 
+>       private Long id;
 > 
->   ...
+>       ...
 > 
->   // 声明表映射关系为@ManyToMany
->   @Size(min=1, message="You must choose at least 1 ingredient")
->   @ManyToMany()
->   private List<Ingredient> ingredients = new ArrayList<>();
+>       // 声明表映射关系为@ManyToMany
+>       @Size(min=1, message="You must choose at least 1 ingredient")
+>       @ManyToMany()
+>       private List<Ingredient> ingredients = new ArrayList<>();
 > 
->   ...
+>       ...
 > }
 > ~~~
 >
@@ -495,10 +494,10 @@
 > @Data
 > @Entity
 > public class TacoOrder implements Serializable {
->   ...
->   // 声明表映射关系为@OneToMany
->   @OneToMany(cascade = CascadeType.ALL)
->   private List<Taco> tacos = new ArrayList<>();
+>       ...
+>       // 声明表映射关系为@OneToMany
+>       @OneToMany(cascade = CascadeType.ALL)
+>       private List<Taco> tacos = new ArrayList<>();
 > }
 > ~~~
 
@@ -508,8 +507,7 @@
 > [/src/main/java/.../data/OrderRepository.java](../ch03/tacos-sd-jpa/src/main/java/tacos/data/OrderRepository.java)
 >
 > ```java
-> public interface OrderRepository extends CrudRepository<TacoOrder, Long> {
-> }
+> public interface OrderRepository extends CrudRepository<TacoOrder, Long> {}
 > ```
 
 ###  3.3.4 自定义JPA repository
