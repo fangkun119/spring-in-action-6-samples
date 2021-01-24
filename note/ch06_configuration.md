@@ -42,7 +42,8 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-
+> * 格式形如`1.2.1`的章节序号为原书的章节序号
+> * 格式形如`(1)/(2)/(3)`的章节序号为在笔记中展开的内容
 
 # CH06 使用配置属性（Configuration Properties）
 
