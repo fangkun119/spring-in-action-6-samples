@@ -1,4 +1,49 @@
-[TOC]
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!--**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*-->
+
+- [CH07 REST Service](#ch07-rest-service)
+- [7.1 RESTful Controller](#71-restful-controller)
+    - [(1) Controller注解](#1-controller%E6%B3%A8%E8%A7%A3)
+    - [7.1.1 查询资源：@GetMapping](#711-%E6%9F%A5%E8%AF%A2%E8%B5%84%E6%BA%90getmapping)
+      - [(1) 例子和说明](#1-%E4%BE%8B%E5%AD%90%E5%92%8C%E8%AF%B4%E6%98%8E)
+    - [7.1.2 创建资源：@PostMapping](#712-%E5%88%9B%E5%BB%BA%E8%B5%84%E6%BA%90postmapping)
+      - [(1) 例子和说明](#1-%E4%BE%8B%E5%AD%90%E5%92%8C%E8%AF%B4%E6%98%8E-1)
+    - [7.1.3 更新资源：@PutMapping、@PatchMapping](#713-%E6%9B%B4%E6%96%B0%E8%B5%84%E6%BA%90putmappingpatchmapping)
+      - [(1) PUT和PATCH的语义表达区别](#1-put%E5%92%8Cpatch%E7%9A%84%E8%AF%AD%E4%B9%89%E8%A1%A8%E8%BE%BE%E5%8C%BA%E5%88%AB)
+      - [(2) PUT的例子](#2-put%E7%9A%84%E4%BE%8B%E5%AD%90)
+      - [(3) PATCH的例子](#3-patch%E7%9A%84%E4%BE%8B%E5%AD%90)
+    - [7.1.4 删除数据：@DeleteMapping](#714-%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AEdeletemapping)
+  - [7.2 使用HATEOAS（超媒体应用状态引擎）](#72-%E4%BD%BF%E7%94%A8hateoas%E8%B6%85%E5%AA%92%E4%BD%93%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81%E5%BC%95%E6%93%8E)
+    - [(1) 超媒体作为应用状态引擎](#1-%E8%B6%85%E5%AA%92%E4%BD%93%E4%BD%9C%E4%B8%BA%E5%BA%94%E7%94%A8%E7%8A%B6%E6%80%81%E5%BC%95%E6%93%8E)
+      - [未开启HATEOAS](#%E6%9C%AA%E5%BC%80%E5%90%AFhateoas)
+      - [开启HATEOAS后](#%E5%BC%80%E5%90%AFhateoas%E5%90%8E)
+    - [(2) HAL (Hypertext Application Language)](#2-hal-hypertext-application-language)
+    - [(3) 添加依赖](#3-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96)
+    - [7.2.1 添加REST API所对应的URL](#721-%E6%B7%BB%E5%8A%A0rest-api%E6%89%80%E5%AF%B9%E5%BA%94%E7%9A%84url)
+      - [(1) 为Taco List生成对应的URL](#1-%E4%B8%BAtaco-list%E7%94%9F%E6%88%90%E5%AF%B9%E5%BA%94%E7%9A%84url)
+    - [7.2.2 创建资源装配器](#722-%E5%88%9B%E5%BB%BA%E8%B5%84%E6%BA%90%E8%A3%85%E9%85%8D%E5%99%A8)
+      - [(1) 为Taco对象生成URL](#1-%E4%B8%BAtaco%E5%AF%B9%E8%B1%A1%E7%94%9F%E6%88%90url)
+      - [(2) 为Ingredient对象生成URL](#2-%E4%B8%BAingredient%E5%AF%B9%E8%B1%A1%E7%94%9F%E6%88%90url)
+    - [7.2.3 命名嵌套式的关联关系](#723-%E5%91%BD%E5%90%8D%E5%B5%8C%E5%A5%97%E5%BC%8F%E7%9A%84%E5%85%B3%E8%81%94%E5%85%B3%E7%B3%BB)
+      - [(1) 嵌套关系默认命名（来自于数据类型）的问题](#1-%E5%B5%8C%E5%A5%97%E5%85%B3%E7%B3%BB%E9%BB%98%E8%AE%A4%E5%91%BD%E5%90%8D%E6%9D%A5%E8%87%AA%E4%BA%8E%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E7%9A%84%E9%97%AE%E9%A2%98)
+      - [(2) 设置嵌套关系命名](#2-%E8%AE%BE%E7%BD%AE%E5%B5%8C%E5%A5%97%E5%85%B3%E7%B3%BB%E5%91%BD%E5%90%8D)
+  - [7.3 使用`Spring Data REST`为repository生成API](#73-%E4%BD%BF%E7%94%A8spring-data-rest%E4%B8%BArepository%E7%94%9F%E6%88%90api)
+    - [(1) 自动生成API](#1-%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90api)
+    - [(2) 设置API的Base Path](#2-%E8%AE%BE%E7%BD%AEapi%E7%9A%84base-path)
+    - [7.3.1 调整资源路径和嵌套关系名称](#731-%E8%B0%83%E6%95%B4%E8%B5%84%E6%BA%90%E8%B7%AF%E5%BE%84%E5%92%8C%E5%B5%8C%E5%A5%97%E5%85%B3%E7%B3%BB%E5%90%8D%E7%A7%B0)
+      - [(1) 获取Spring Data REST生成的API地址](#1-%E8%8E%B7%E5%8F%96spring-data-rest%E7%94%9F%E6%88%90%E7%9A%84api%E5%9C%B0%E5%9D%80)
+      - [(2) 修改资源路径和资源关系名称](#2-%E4%BF%AE%E6%94%B9%E8%B5%84%E6%BA%90%E8%B7%AF%E5%BE%84%E5%92%8C%E8%B5%84%E6%BA%90%E5%85%B3%E7%B3%BB%E5%90%8D%E7%A7%B0)
+    - [7.3.2 分页和排序](#732-%E5%88%86%E9%A1%B5%E5%92%8C%E6%8E%92%E5%BA%8F)
+      - [(1) 分页](#1-%E5%88%86%E9%A1%B5)
+      - [(2) 排序](#2-%E6%8E%92%E5%BA%8F)
+    - [7.3.3 添加自定义的REST API端点](#733-%E6%B7%BB%E5%8A%A0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84rest-api%E7%AB%AF%E7%82%B9)
+      - [(1) 问题](#1-%E9%97%AE%E9%A2%98)
+      - [(2) 解决Base Path配置不统一的问题](#2-%E8%A7%A3%E5%86%B3base-path%E9%85%8D%E7%BD%AE%E4%B8%8D%E7%BB%9F%E4%B8%80%E7%9A%84%E9%97%AE%E9%A2%98)
+    - [7.3.4 为Spring Data端点添加自定义的超链接](#734-%E4%B8%BAspring-data%E7%AB%AF%E7%82%B9%E6%B7%BB%E5%8A%A0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84%E8%B6%85%E9%93%BE%E6%8E%A5)
+  - [7.4 小结](#74-%E5%B0%8F%E7%BB%93)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 > * 格式形如`1.2.1`的章节序号为原书的章节序号
 > * 格式形如`(1)/(2)/(3)`的章节序号为在笔记中展开的内容
@@ -80,31 +125,31 @@ REST  Controller：[/tacocloud-api/src/main/java/tacos/web/api/RecentTacosContro
 > @CrossOrigin(origins="*")
 > public class DesignTacoController {
 > 	// 注入repository
->     private TacoRepository tacoRepo;	
->     public DesignTacoController(TacoRepository tacoRepo) {
+>    	private TacoRepository tacoRepo;	
+>    	public DesignTacoController(TacoRepository tacoRepo) {
 > 		this.tacoRepo = tacoRepo;
 > 	}
 > 
->     // 处理发到/design/recent上的GET请求
+>    	// 处理发到/design/recent上的GET请求
 > 	@GetMapping("/recent")
 > 	public Iterable<Taco> recentTacos() {
 > 		PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
 > 		return tacoRepo.findAll(page).getContent();
 > 	}
 > 
->     ...
+>    	...
 > 
->     // 处理发到/design/${id}上的请求
+>    	// 处理发到/design/${id}上的请求
 > 	@GetMapping("/{id}")
 > 	public Taco tacoById(@PathVariable("id") Long id) {
->     	Optional<Taco> optTaco = tacoRepo.findById(id);
->     	if (optTaco.isPresent()) {
-> 			return optTaco.get();
->     	}
->         // 返回一个空的Response以及Status Code 200（OK）
-> 		return null;
->         // 如果把Status Code改为404（Not Found）可以采用下面的方法
->         // return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+>            Optional<Taco> optTaco = tacoRepo.findById(id);
+>            if (optTaco.isPresent()) {
+>             return optTaco.get();
+>            }
+>            // 返回一个空的Response以及Status Code 200（OK）
+>         return null;
+>            // 如果把Status Code改为404（Not Found）可以采用下面的方法
+>            // return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 > 	}
 > }
 > ~~~
@@ -142,15 +187,15 @@ REST Controller：[/tacocloud-api/src/main/java/tacos/web/api/DesignTacoControll
 > @RequestMapping(path="/design", produces="application/json")
 > @CrossOrigin(origins="*")
 > public class DesignTacoController {
->     ...
+>    	...
 > 
->     // 只处理'Content-type'设置为'application/json'的请求
->     @PostMapping(consumes="application/json")
->     // 在没有抛出异常时的HTTP Status Code为201:CREATED，比200:OK描述性更强
->     @ResponseStatus(HttpStatus.CREATED)
->     public Taco postTaco(@RequestBody/*将Body转成Taco类型*/ Taco taco) {
->       return tacoRepo.save(taco);
->     }
+>    	// 只处理'Content-type'设置为'application/json'的请求
+>    	@PostMapping(consumes="application/json")
+>    	// 在没有抛出异常时的HTTP Status Code为201:CREATED，比200:OK描述性更强
+>    	@ResponseStatus(HttpStatus.CREATED)
+>    	public Taco postTaco(@RequestBody/*将Body转成Taco类型*/ Taco taco) {
+>    		return tacoRepo.save(taco);
+>    	}
 > }
 > ```
 
@@ -183,13 +228,13 @@ POST可以用来创建资源、也可以用来更新资源
 > @RequestMapping(path="/orders", produces="application/json")
 > @CrossOrigin(origins="*")
 > public class OrderApiController {
->     ...
->     @PutMapping(path="/{orderId}", consumes="application/json")
->     public Order putOrder(@PathVariable("orderId") Long orderId, @RequestBody Order order) {
->         order.setId(orderId);
->         return repo.save(order);
->     }
->     ...
+>    	...
+>    	@PutMapping(path="/{orderId}", consumes="application/json")
+>    	public Order putOrder(@PathVariable("orderId") Long orderId, @RequestBody Order order) {
+>    		order.setId(orderId);
+>    		return repo.save(order);
+>    	}
+>    	...
 > }
 > ~~~
 >
@@ -204,23 +249,23 @@ POST可以用来创建资源、也可以用来更新资源
 > @RequestMapping(path="/orders", produces="application/json")
 > @CrossOrigin(origins="*")
 > public class OrderApiController {
->     ...
->     @PatchMapping(path="/{orderId}", consumes="application/json")
->     public Order patchOrder(@PathVariable("orderId") Long orderId, @RequestBody Order patch) {
->         Order order = repo.findById(orderId).get();
->         if (patch.getDeliveryName() != null) {
->             order.setDeliveryName(patch.getDeliveryName());
->         }
->         if (patch.getDeliveryStreet() != null) {
->             order.setDeliveryStreet(patch.getDeliveryStreet());
->         }
->         ...
->         if (patch.getCcCVV() != null) {
->             order.setCcCVV(patch.getCcCVV());
->         }
->         return repo.save(order);
->     }
->     ...
+>    	...
+>    	@PatchMapping(path="/{orderId}", consumes="application/json")
+>    	public Order patchOrder(@PathVariable("orderId") Long orderId, @RequestBody Order patch) {
+>    		Order order = repo.findById(orderId).get();
+>    		if (patch.getDeliveryName() != null) {
+>    			order.setDeliveryName(patch.getDeliveryName());
+>    		}
+>    		if (patch.getDeliveryStreet() != null) {
+>    			order.setDeliveryStreet(patch.getDeliveryStreet());
+>    		}
+>    		...
+>    		if (patch.getCcCVV() != null) {
+>    			order.setCcCVV(patch.getCcCVV());
+>    		}
+>    		return repo.save(order);
+>    	}
+>    	...
 > }
 > ~~~
 >
@@ -235,18 +280,20 @@ POST可以用来创建资源、也可以用来更新资源
 > @RequestMapping(path="/orders", produces="application/json")
 > @CrossOrigin(origins="*")
 > public class OrderApiController {
->     ...
+> 	...
+> 	
 > 	@DeleteMapping("/{orderId}")
->     // 正常情况下返回HTTP Status Code 204: NO CONTENT
+> 	// 正常情况下返回HTTP Status Code 204: NO CONTENT
 > 	@ResponseStatus(HttpStatus.NO_CONTENT)
 > 	public void deleteOrder(@PathVariable("orderId") Long orderId) {
 > 		try {
 > 			repo.deleteById(orderId);
->     	} catch (EmptyResultDataAccessException e) {
->             // 不处理EmptyResultDataAccessException是希望表示在资源部存在时执行删除操作也视为成功
->             // 另一个选择是返回HTTP Status Code 404:NOT FOUND
->         }
->   	}
+>  	} catch (EmptyResultDataAccessException e) {
+>          // 不处理EmptyResultDataAccessException是希望表示在资源部存在时执行删除操作也视为成功
+>          // 另一个选择是返回HTTP Status Code 404:NOT FOUND
+>      }
+> 	}
+> 	
 >     ...
 > }
 > ~~~
@@ -365,23 +412,23 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > ~~~java
 > @GetMapping("/recent")
 > public CollectionModel<EntityModel<Taco>> recentTacos() {
->     PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
->     List<Taco> tacos = tacoRepo.findAll(page).getContent();
->     // 添加整个taco list的URL
->     CollectionModel<EntityModel<Taco>> recentResources = CollectionModel.wrap(tacos); // 后续要改
->     recentResources.add(
->         // (1) 完全hard coding
->         // new Link("http://localhost:8080/design/recent", "recents") 
->         // (2) 部分hard coding
->         // WebMvcLinkBuilder
->         // 	.linkTo(DesignTacoController.class) // 基准url来源
->         // 	.slash("recent")					// 以基准为参照的相对路径，这里仍然有一点hardcoding
->         // 	.withRel("recents")					// 链接名称
->         // (3) 彻底消除hard coding
->         linkTo(
->             methodOn(DesignTacoController.class).recentTacos() // 生成url
->         ).withRel("recents"))								   // 链接名称
->     );
+>    	PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+>    	List<Taco> tacos = tacoRepo.findAll(page).getContent();
+>    	// 添加整个taco list的URL
+>    	CollectionModel<EntityModel<Taco>> recentResources = CollectionModel.wrap(tacos); // 后续要改
+>    	recentResources.add(
+>    		// (1) 完全hard coding
+>    		// new Link("http://localhost:8080/design/recent", "recents") 
+>    		// (2) 部分hard coding
+>    		// WebMvcLinkBuilder
+>    		// 	.linkTo(DesignTacoController.class) // 基准url来源
+>    		// 	.slash("recent")					// 以基准为参照的相对路径，这里仍然有一点hardcoding
+>    		// 	.withRel("recents")					// 链接名称
+>    		// (3) 彻底消除hard coding
+>    		linkTo(
+>    			methodOn(DesignTacoController.class).recentTacos() // 生成url
+>    		).withRel("recents"))								   // 链接名称
+>    	);
 > 	return recentResources;
 > }
 > ~~~
@@ -419,7 +466,7 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 
 > 	@Getter
 > 	// private List<Ingredient> ingredients; 
->     private final CollectionModel<IngredientEntityModel> ingredients; //下一小节介绍
+>    	private final CollectionModel<IngredientEntityModel> ingredients; //下一小节介绍
 > 
 > 	public TacoResource(Taco taco) {
 > 		this.name = taco.getName();
@@ -456,7 +503,7 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 		super(DesignTacoController.class, TacoEntityModel.class);
 > 	}
 > 
->     // 仅被框架用来生成TacoEntityModel对象
+>    	// 仅被框架用来生成TacoEntityModel对象
 > 	@Override
 > 	protected TacoEntityModel instantiateModel(Taco taco) {
 >         // 用Taco对象（Domain Object）创建TacoEntityModel对象（Resource）
@@ -465,7 +512,7 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 		return new TacoEntityModel(taco);
 > 	}
 > 
->     // 除了用来生成TacoEntityModel对象，还会用来生成URL
+>    	// 除了用来生成TacoEntityModel对象，还会用来生成URL
 > 	@Override
 > 	public TacoEntityModel toModel(Taco taco) {
 >         // 该方法必须override，传入taco的id会被用来生成URL
@@ -480,16 +527,16 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > @GetMapping("/recent")
 > public Resources<TacoEntityModel> recentTacos() {
 > 	// 从DAO层获得Taco对象（Domain Object）
->     PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+>    	PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
 > 	List<Taco> tacos = tacoRepo.findAll(page).getContent();
->     // 将Taco对象（Domain Object）转换成能生成URL的TacoEntityModel对象（Resource）
+>    	// 将Taco对象（Domain Object）转换成能生成URL的TacoEntityModel对象（Resource）
 > 	List<TacoEntityModel> tacoResources = new TacoEntityModelAssembler().toModels(tacos);
->     Resources<TacoEntityModel> recentResources = new Resources<TacoEntityModel>(tacoResources);
->     // 添加整个taco list的URL
+>    	Resources<TacoEntityModel> recentResources = new Resources<TacoEntityModel>(tacoResources);
+>    	// 添加整个taco list的URL
 > 	recentResources.add(
 > 		linkTo(methodOn(DesignTacoController.class).recentTacos()
 > 	).withRel("recents"));
->   return recentResources;
+>   	return recentResources;
 > }
 > ~~~
 
@@ -528,8 +575,8 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 >
 > ~~~java
 > public class IngredientEntityModel extends EntityModel<IngredientEntityModel> {
->     // 与TocoEntityModel类似
->     // 包含Domain的其他属性，不包含id属性，但会从基类继承到URL
+>    	// 与TocoEntityModel类似
+>    	// 包含Domain的其他属性，不包含id属性，但会从基类继承到URL
 > 	@Getter
 > 	private String name;
 > 
@@ -549,23 +596,23 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > class IngredientEntityModelAssembler extends
 >           RepresentationModelAssemblerSupport<Ingredient, IngredientEntityModel> {
 > 	public IngredientEntityModelAssembler() {
->         // 当创建IngredientEntityModel对象时会使用IngredientController来决定URL的base path
+>    		// 当创建IngredientEntityModel对象时会使用IngredientController来决定URL的base path
 > 		super(IngredientController.class, IngredientEntityModel.class);
 > 	}
 > 
->     // 仅被框架用来生成TacoEntityModel对象
+>    	// 仅被框架用来生成TacoEntityModel对象
 > 	@Override
 > 	protected IngredientEntityModel instantiateModel(Ingredient ingredient) {
->         // 用Ingredient对象（Domain Object）创建IngredientEntityModel对象（Resource）
->         // 如果IngredientEntityModel有默认构造函数，则该方法只是可选的
->         // 否则则必须override这个方法
+>    		// 用Ingredient对象（Domain Object）创建IngredientEntityModel对象（Resource）
+>    		// 如果IngredientEntityModel有默认构造函数，则该方法只是可选的
+>    		// 否则则必须override这个方法
 > 		return new IngredientEntityModel(ingredient);
 > 	}
 > 
->     // 除了用来生成TacoEntityModel对象，还会用来生成URL
+>    	// 除了用来生成TacoEntityModel对象，还会用来生成URL
 > 	@Override
 > 	public IngredientEntityModel toModel(Ingredient ingredient) {
->         // 传入的id被用来生成URL
+>    		// 传入的id被用来生成URL
 > 		return createModelWithId(ingredient.getId(), ingredient);
 > 	}
 > }
@@ -612,16 +659,16 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > @GetMapping("/recent")
 > public Resources<TacoEntityModel> recentTacos() {
 > 	// 从DAO层获得Taco对象（Domain Object）
->     PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+>    	PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
 > 	List<Taco> tacos = tacoRepo.findAll(page).getContent();
->     // 将Taco对象（Domain Object）转换成能生成URL的TacoEntityModel对象（Resource）
+>    	// 将Taco对象（Domain Object）转换成能生成URL的TacoEntityModel对象（Resource）
 > 	List<TacoEntityModel> tacoResources = new TacoEntityModelAssembler().toModels(tacos);
->     Resources<TacoEntityModel> recentResources = new Resources<TacoEntityModel>(tacoResources);
->     // 添加整个taco list的URL
+>    	Resources<TacoEntityModel> recentResources = new Resources<TacoEntityModel>(tacoResources);
+>    	// 添加整个taco list的URL
 > 	recentResources.add(
 > 		linkTo(methodOn(DesignTacoController.class).recentTacos()
 > 	).withRel("recents"));
->   return recentResources;
+>   	return recentResources;
 > }
 > ```
 
@@ -645,7 +692,7 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 
 > 	@Getter
 > 	// private List<Ingredient> ingredients; 
->     private final CollectionModel<IngredientEntityModel> ingredients; //下一小节介绍
+>    	private final CollectionModel<IngredientEntityModel> ingredients; //下一小节介绍
 > 
 > 	public TacoResource(Taco taco) {
 > 		this.name = taco.getName();
@@ -903,9 +950,9 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 		recentResources.add(
 > 			linkTo(methodOn(RecentTacosController.class).recentTacos())
 >             .withRel("recents"));
->         // 使用@RepositoryRestController注解时，不会默认返回Json，需要
->         // 方法1：用@ResponseBody注解该方法
->         // 方法2：用ResponseEntity包裹返回结果
+>         	// 使用@RepositoryRestController注解时，不会默认返回Json，需要
+>         	// 方法1：用@ResponseBody注解该方法
+>         	// 方法2：用ResponseEntity包裹返回结果
 > 		return new ResponseEntity<>(recentResources, HttpStatus.OK);
 > 	}
 > }
@@ -924,9 +971,9 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > @Bean
 > public RepresentationModelProcessor<PagedModel<EntityModel<Taco>>>tacoProcessor(EntityLinks links) {
 > 	return new RepresentationModelProcessor<PagedModel<EntityModel<Taco>>>() {
->         // PagedModel<EntityModel<Taco>>
->         // * 是Spring Data REST生成的controller返回的数据类型
->         // * 对应的路径是`/{spring.data.rest.base-path}/tacos`
+>         	// PagedModel<EntityModel<Taco>>
+>         	// * 是Spring Data REST生成的controller返回的数据类型
+>         	// * 对应的路径是`/{spring.data.rest.base-path}/tacos`
 > 		@Override
 > 		public PagedModel<EntityModel<Taco>> process(PagedModel<EntityModel<Taco>> resource) {
 >             // 调用`/{spring.data.rest.base-path}/tacos/`时
