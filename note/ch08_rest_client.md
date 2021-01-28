@@ -35,6 +35,9 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+> * 格式形如`1.2.1`的章节序号为原书的章节序号
+> * 格式形如`(1)/(2)/(3)`的章节序号为在笔记中展开的内容
+
 # CH08 REST Client
 
 内容来源：https://livebook.manning.com/book/spring-in-action-sixth-edition/chapter-8/v-4/26 （限时预览、超过时限后要购买才能继续阅读）
