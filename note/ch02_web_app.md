@@ -50,6 +50,11 @@
 ### 2.1.1 构建Domain Object
 
 > 使用lambok编写Domain Object，可以自动生成所需的方法，避免手工编写，让代码简洁
+>
+> 参考资料：
+>
+> * [https://www.baeldung.com/intro-to-project-lombok](https://www.baeldung.com/intro-to-project-lombok)
+> * [https://www.baeldung.com/lombok-ide](https://www.baeldung.com/lombok-ide)
 
 #### (1) 添加`lombok`编译依赖
 
