@@ -4,23 +4,24 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!--**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*-->
 
-- [CH01 Spring起步](#ch01-spring%E8%B5%B7%E6%AD%A5)
-  - [1.1 Spring介绍](#11-spring%E4%BB%8B%E7%BB%8D)
-  - [1.2 初始化Spring应用](#12-%E5%88%9D%E5%A7%8B%E5%8C%96spring%E5%BA%94%E7%94%A8)
-    - [1.2.1 使用IDE初始化Spring项目](#121-%E4%BD%BF%E7%94%A8ide%E5%88%9D%E5%A7%8B%E5%8C%96spring%E9%A1%B9%E7%9B%AE)
-    - [1.2.1 查看Spring项目结构](#121-%E6%9F%A5%E7%9C%8Bspring%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84)
-      - [(1) `SpringBootApplication`注解](#1-springbootapplication%E6%B3%A8%E8%A7%A3)
-      - [(2) 测试上下文初始化](#2-%E6%B5%8B%E8%AF%95%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%9D%E5%A7%8B%E5%8C%96)
-  - [1.3 编写Spring应用](#13-%E7%BC%96%E5%86%99spring%E5%BA%94%E7%94%A8)
-    - [1.3.1 处理Web请求](#131-%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82)
-    - [1.3.2 定义视图](#132-%E5%AE%9A%E4%B9%89%E8%A7%86%E5%9B%BE)
-    - [1.3.3 测试Controller](#133-%E6%B5%8B%E8%AF%95controller)
-    - [1.3.4 构建和运行](#134-%E6%9E%84%E5%BB%BA%E5%92%8C%E8%BF%90%E8%A1%8C)
-    - [1.3.5 了解Spring Boot DevTools (STS)](#135-%E4%BA%86%E8%A7%A3spring-boot-devtools-sts)
-      - [(1) 功能特点](#1-%E5%8A%9F%E8%83%BD%E7%89%B9%E7%82%B9)
-    - [1.3.6 小节回顾](#136-%E5%B0%8F%E8%8A%82%E5%9B%9E%E9%A1%BE)
-  - [1.4 俯瞰Spring风景线](#14-%E4%BF%AF%E7%9E%B0spring%E9%A3%8E%E6%99%AF%E7%BA%BF)
-  - [1.5 小结](#15-%E5%B0%8F%E7%BB%93)
+- [1.1 Spring介绍](#11-spring%E4%BB%8B%E7%BB%8D)
+- [1.2 初始化Spring应用](#12-%E5%88%9D%E5%A7%8B%E5%8C%96spring%E5%BA%94%E7%94%A8)
+  - [1.2.1 使用IDE初始化Spring项目](#121-%E4%BD%BF%E7%94%A8ide%E5%88%9D%E5%A7%8B%E5%8C%96spring%E9%A1%B9%E7%9B%AE)
+  - [1.2.1 查看Spring项目结构](#121-%E6%9F%A5%E7%9C%8Bspring%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84)
+    - [(1) 理解`@SpringBootApplication`注解](#1-%E7%90%86%E8%A7%A3springbootapplication%E6%B3%A8%E8%A7%A3)
+    - [(2) 测试上下文初始化](#2-%E6%B5%8B%E8%AF%95%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%9D%E5%A7%8B%E5%8C%96)
+- [1.3 编写Spring应用](#13-%E7%BC%96%E5%86%99spring%E5%BA%94%E7%94%A8)
+  - [1.3.1 处理Web请求](#131-%E5%A4%84%E7%90%86web%E8%AF%B7%E6%B1%82)
+  - [1.3.2 定义视图](#132-%E5%AE%9A%E4%B9%89%E8%A7%86%E5%9B%BE)
+  - [1.3.3 测试Controller和Thymeleaf模板](#133-%E6%B5%8B%E8%AF%95controller%E5%92%8Cthymeleaf%E6%A8%A1%E6%9D%BF)
+    - [(1) 测试Controller](#1-%E6%B5%8B%E8%AF%95controller)
+    - [(2) 测试Thymeleaf模板](#2-%E6%B5%8B%E8%AF%95thymeleaf%E6%A8%A1%E6%9D%BF)
+  - [1.3.4 构建和运行](#134-%E6%9E%84%E5%BB%BA%E5%92%8C%E8%BF%90%E8%A1%8C)
+  - [1.3.5 了解Spring Boot DevTools (STS)](#135-%E4%BA%86%E8%A7%A3spring-boot-devtools-sts)
+    - [(1) 功能特点](#1-%E5%8A%9F%E8%83%BD%E7%89%B9%E7%82%B9)
+  - [1.3.6 小节回顾](#136-%E5%B0%8F%E8%8A%82%E5%9B%9E%E9%A1%BE)
+- [1.4 俯瞰Spring风景线](#14-%E4%BF%AF%E7%9E%B0spring%E9%A3%8E%E6%99%AF%E7%BA%BF)
+- [1.5 小结](#15-%E5%B0%8F%E7%BB%93)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -40,45 +41,52 @@
 
 ### 1.2.1 查看Spring项目结构
 
-> Spring项目创建后，各个目录和组成部分的用途。摘选下面两部分，其他内容略。
+> Spring项目创建后，各个目录和组成部分的用途。摘选下面两部分，其他内容略
 
-#### (1) `SpringBootApplication`注解
+#### (1) 理解`@SpringBootApplication`注解
 
+> ~~~java
+> @SpringBootApplication   // <1>
+> public class TacoCloudApplication {
+> 	public static void main(String[] args) {
+> 		SpringApplication.run(TacoCloudApplication.class, args); // <2>
+> 	}
+> }
+> ~~~
+>
+> 上线代码中的`@SpringBootApplication`是一个组合注解、组合了3个其他的注解，分别是：
+>
+> * `@SpringBootConfiguration`：将该类声明为配置类、是`@Configuration`注解的特殊形式。
+> * `@EnableAutoConfiguration`：启用SpringBoot的自动配置。
+> * `@ComponentScan`：启用组件扫描，能够自动发现并注册哪些、被@Component、@Controller、@Service等注解的类
+>
 > ~~~java
 > ...
 > @SpringBootConfiguration
 > @EnableAutoConfiguration
 > @ComponentScan(
->     excludeFilters = {@Filter(
->     type = FilterType.CUSTOM,
->     classes = {TypeExcludeFilter.class}
-> ), @Filter(
->     type = FilterType.CUSTOM,
->     classes = {AutoConfigurationExcludeFilter.class}
-> )}
+> 	excludeFilters = {
+> 		@Filter(type = FilterType.CUSTOM, classes = {TypeExcludeFilter.class}),
+>         @Filter(type = FilterType.CUSTOM, classes = {AutoConfigurationExcludeFilter.class})
+>     }
 > )
 > public @interface SpringBootApplication {
->     ...
+> 	...
 > }
 > ~~~
 >
-> @SpringBootApplication是一个组合注解，它组合了3个其他的注解。
->
-> * `@SpringBootConfiguration`：将该类声明为配置类、是@Configuration注解的特殊形式。
-> * `@EnableAutoConfiguration`：启用SpringBoot的自动配置。
-> * `@ComponentScan`：启用组件扫描，能够自动发现并注册哪些、被@Component、@Controller、@Service等注解的类
 
 #### (2) 测试上下文初始化
 
 > 代码（Spring Boot 2.4.1）：[/src/test/.../TacoCloudApplicationTests.java](../ch01/taco-cloud/src/test/java/tacos/TacoCloudApplicationTests.java)
 >
 > ~~~java
-> @SpringBootTest                   // <1>
+> @SpringBootTest
 > public class TacoCloudApplicationTests {
->       @Test                         // <2>
->       public void contextLoads() {
->           // 空白的测试方法虽然没有内容，但它可以检查Spring上下文是否可以成功加载
->       }
+>    	@Test
+>    	public void contextLoads() {
+>    		// 空白的测试方法虽然没有内容，但它可以检查Spring上下文是否可以成功加载
+>    	}
 > }
 > ~~~
 >
@@ -125,11 +133,10 @@
 > ```java
 > @WebMvcTest(HomeController.class)   // <1> 让测试在Spring MVC的上下文中执行
 > public class HomeControllerTest {
-> 
->       @Autowired
+>    @Autowired
 >       private MockMvc mockMvc;   // <2> Mock MVC所需要的服务器
-> 
->       @Test
+>    
+>    @Test
 >       public void testHomePage() throws Exception {
 >         mockMvc.perform(get("/"))    // <3> 发起对"/"的GET请求
 >           .andExpect(status().isOk())  // <4> 期望得到HTTP 200
@@ -137,7 +144,7 @@
 >           .andExpect(content().string(           // <6> 期望包含“Welcome to..."
 >               containsString("Welcome to...")));
 >       }
-> }
+>    }
 > ```
 
 #### (2) 测试Thymeleaf模板
@@ -148,36 +155,36 @@
 > // 用随机端口启动Spring容器，触发thymeleaf模板渲染，检查渲染后返回的页面
 > @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 > public class HomePageBrowserTest {
->   @LocalServerPort
->   private int port;
->   private static HtmlUnitDriver browser;
+>   	@LocalServerPort
+>   	private int port;
+>   	private static HtmlUnitDriver browser;
 > 
->   @BeforeAll
->   public static void setup() {
->     browser = new HtmlUnitDriver();
->     browser.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
->   }
+>   	@BeforeAll
+>   	public static void setup() {
+>    		browser = new HtmlUnitDriver();
+>    		browser.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+>   	}
 > 
->   @AfterAll
->   public static void teardown() {
->     browser.quit();
->   }
+>   	@AfterAll
+>   	public static void teardown() {
+>    		browser.quit();
+>   	}
 > 
->   @Test
->   public void testHomePage() {
->     // 模板渲染后的页面地址
->     String homePage = "http://localhost:" + port;
->     browser.get(homePage);
->     // 检查title
->     String titleText = browser.getTitle();
->     Assertions.assertEquals("Taco Cloud", titleText);
->     // 检查html中的文字内容
->     String h1Text = browser.findElementByTagName("h1").getText();
->     Assertions.assertEquals("Welcome to...", h1Text);
->     // 检查html中的图片
->     String imgSrc = browser.findElementByTagName("img").getAttribute("src");
->     Assertions.assertEquals(homePage + "/images/TacoCloud.png", imgSrc);
->   }
+>   	@Test
+>   	public void testHomePage() {
+>    		// 模板渲染后的页面地址
+>    		String homePage = "http://localhost:" + port;
+>    		browser.get(homePage);
+>    		// 检查title
+>    		String titleText = browser.getTitle();
+>    		Assertions.assertEquals("Taco Cloud", titleText);
+>    		// 检查html中的文字内容
+>    		String h1Text = browser.findElementByTagName("h1").getText();
+>    		Assertions.assertEquals("Welcome to...", h1Text);
+>    		// 检查html中的图片
+>    		String imgSrc = browser.findElementByTagName("img").getAttribute("src");
+>    		Assertions.assertEquals(homePage + "/images/TacoCloud.png", imgSrc);
+>   	}
 > }
 > ```
 

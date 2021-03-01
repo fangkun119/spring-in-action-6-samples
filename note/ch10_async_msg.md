@@ -1,3 +1,11 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [CH10 异步消息收发](#ch10-%E5%BC%82%E6%AD%A5%E6%B6%88%E6%81%AF%E6%94%B6%E5%8F%91)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ### CH10 异步消息收发
 
 > 原书第6版尚未写完，以下是原书第5版对应章节笔记

@@ -24,6 +24,8 @@
     - [3.2.3 添加注解用于Domain Object持久化](#323-%E6%B7%BB%E5%8A%A0%E6%B3%A8%E8%A7%A3%E7%94%A8%E4%BA%8Edomain-object%E6%8C%81%E4%B9%85%E5%8C%96)
       - [(1) 注解及例子](#1-%E6%B3%A8%E8%A7%A3%E5%8F%8A%E4%BE%8B%E5%AD%90)
       - [(2) 使用Repository](#2-%E4%BD%BF%E7%94%A8repository)
+    - [3.2.4 使用`CommandLineRunner`或者`ApplicationRunner`执行初始化操作](#324-%E4%BD%BF%E7%94%A8commandlinerunner%E6%88%96%E8%80%85applicationrunner%E6%89%A7%E8%A1%8C%E5%88%9D%E5%A7%8B%E5%8C%96%E6%93%8D%E4%BD%9C)
+      - [(1) 使用方法](#1-%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95)
   - [3.3 使用`Spring Data JPA`](#33-%E4%BD%BF%E7%94%A8spring-data-jpa)
     - [3.3.1 添加`Spring Data JPA`到项目中](#331-%E6%B7%BB%E5%8A%A0spring-data-jpa%E5%88%B0%E9%A1%B9%E7%9B%AE%E4%B8%AD)
       - [(1) 添加依赖及选择不同的JPA实现](#1-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96%E5%8F%8A%E9%80%89%E6%8B%A9%E4%B8%8D%E5%90%8C%E7%9A%84jpa%E5%AE%9E%E7%8E%B0)
@@ -66,15 +68,15 @@
 > ~~~xml
 > <!-- jdbc starter -->
 > <dependency>
->   <groupId>org.springframework.boot</groupId>
->   <artifactId>spring-boot-starter-jdbc</artifactId>
+>   	<groupId>org.springframework.boot</groupId>
+>   	<artifactId>spring-boot-starter-jdbc</artifactId>
 > </dependency>
 > <!-- database connector -->
 > <!-- 为了方便演示，使用了H2嵌入式数据库 -->
 > <dependency>
->   <groupId>com.h2database</groupId>
->   <artifactId>h2</artifactId>
->   <scope>runtime</scope>
+>   	<groupId>com.h2database</groupId>
+>   	<artifactId>h2</artifactId>
+>   	<scope>runtime</scope>
 > </dependency>
 > ~~~
 
@@ -84,9 +86,9 @@
 >
 > ~~~java
 > public interface IngredientRepository {
->       Iterable<Ingredient> findAll();
->       Optional<Ingredient> findById(String id);
->       Ingredient save(Ingredient ingredient);
+>    	Iterable<Ingredient> findAll();
+>    	Optional<Ingredient> findById(String id);
+>    	Ingredient save(Ingredient ingredient);
 > }
 > ~~~
 >
@@ -95,37 +97,37 @@
 > ```java
 > @Repository // 可以被Spring当做DAO来加载到Spring上下文中
 > public class JdbcIngredientRepository implements IngredientRepository { 
->        private JdbcTemplate jdbcTemplate;
+>    	private JdbcTemplate jdbcTemplate;
 >     
->        @Autowired //注入JdbcTemplate
->        public JdbcIngredientRepository(JdbcTemplate jdbcTemplate) {
->           this.jdbcTemplate = jdbcTemplate;
->        }
+>    	@Autowired //注入JdbcTemplate
+>    	public JdbcIngredientRepository(JdbcTemplate jdbcTemplate) {
+>    		this.jdbcTemplate = jdbcTemplate;
+>    	}
 >    
->        @Override
->        public Optional<Ingredient> findById(String id) {
->           List<Ingredient> results = jdbcTemplate.query(
->               "select id, name, type from Ingredient where id=?",
->               this::mapRowToIngredient, /*用lambda表达式实现函数式接口RowMapper<Ingredient>*/ 
->               id /*与SQL中的?相对应*/);
->           return results.size() == 0 ?  Optional.empty() :  Optional.of(results.get(0));
->        }
+>    	@Override
+>    	public Optional<Ingredient> findById(String id) {
+>    		List<Ingredient> results = jdbcTemplate.query(
+>    			"select id, name, type from Ingredient where id=?",
+>    			this::mapRowToIngredient, /*用lambda表达式实现函数式接口RowMapper<Ingredient>*/ 
+>    			id /*与SQL中的?相对应*/);
+>    		return results.size() == 0 ?  Optional.empty() :  Optional.of(results.get(0));
+>    	}
 > 
->        private Ingredient mapRowToIngredient(ResultSet row, int rowNum) throws SQLException{
->           return new Ingredient(
->               row.getString("id"),  row.getString("name"),
->               Ingredient.Type.valueOf(row.getString("type")));
->        }
+>    	private Ingredient mapRowToIngredient(ResultSet row, int rowNum) throws SQLException{
+>    		return new Ingredient(
+>    			row.getString("id"),  row.getString("name"),
+>    			Ingredient.Type.valueOf(row.getString("type")));
+>    	}
 >     
->        @Override
->        public Ingredient save(Ingredient ingredient) {
->           // insert数据的方法: (1)直接用update()方法；(2)使用SimpleJdbcInsert包装器类
->           jdbcTemplate.update(
->              "insert into Ingredient (id, name, type) values (?, ?, ?)",
->              ingredient.getId(),
->              ingredient.getName(),
->              ingredient.getType().toString());
->           return ingredient;
+>    	@Override
+>    	public Ingredient save(Ingredient ingredient) {
+>    		// insert数据的方法: (1)直接用update()方法；(2)使用SimpleJdbcInsert包装器类
+>    		jdbcTemplate.update(
+>    			"insert into Ingredient (id, name, type) values (?, ?, ?)",
+>    			ingredient.getId(),
+>    			ingredient.getName(),
+>    			ingredient.getType().toString());
+>    		return ingredient;
 >        }
 > }
 > ```
@@ -139,23 +141,22 @@
 > @RequestMapping("/design")
 > @SessionAttributes("tacoOrder")
 > public class DesignTacoController {
->         private final IngredientRepository ingredientRepo;
+>    	private final IngredientRepository ingredientRepo;
 > 
->         @Autowired
->         public DesignTacoController(
->                 IngredientRepository ingredientRepo) {
->             this.ingredientRepo = ingredientRepo;
->         }
->     
->         ...
-> }
+>    	@Autowired
+>    	public DesignTacoController(IngredientRepository ingredientRepo) {
+>    		this.ingredientRepo = ingredientRepo;
+>    	}
+>    
+>     	...
+>    }
 > ```
 
 ###  3.1.3 数据库Schema及预加载数据 
 
 #### (1) 项目的数据库Schema
 
-> ![](https://raw.githubusercontent.com/kenfang119/pics/main/002_spring_boot/spring_in_action_6_ch3_db_schema.jpg)
+> <div align="left"><img src="https://raw.githubusercontent.com/kenfang119/pics/main/002_spring_boot/spring_in_action_6_ch3_db_schema.jpg" width="800" /></div>
 
 ####  (2) 自动向H2数据库建表并加载测试数据
 
@@ -164,6 +165,8 @@
 > [/src/main/resources/data.sql](../ch03/tacos-jdbctemplate/src/main/resources/data.sql)
 >
 > 根据命名约定，Spring Boot会在启动时执行resources根目录下的这两个文件，建表并预加载数据库
+>
+> 另外还可以使用`3.2.4`小节介绍的`CommandLineRunner`或`ApplicationRunner`方法来初始化数据库。对于关系型数据库来说，三种方法等价，可以任选一种；但后两种方法还可以用于非关系型数据库或其他用途。
 
 ### 3.1.4 插入数据
 
@@ -175,7 +178,7 @@
 
 ####  (1) 嵌套Domain  Object问题
 
-> 插入数据困难的地方在于，如果插入嵌套Domain Objects，数据会插入到多张表中，并且这些表之间存在 外键依赖，过程会非常复杂，代码维护负担也比较大 。这个问题在小节`3.2. Spring Data JDBC`中解决 
+> 插入数据困难的地方在于，如果插入嵌套Domain Objects，数据会插入到多张表中，并且这些表之间存在 外键依赖，过程会非常复杂，代码维护负担也比较大 。
 >
 > 例如：[/src/main/java/.../data/JdbcOrderRepository.java](../ch03/tacos-jdbctemplate/src/main/java/tacos/data/JdbcOrderRepository.java) 中的`save(TacoOrder)`方法
 >
@@ -235,10 +238,14 @@
 
 #### (2) 解决插入嵌套Domain Object时代码冗余的问题
 
-> 使用`SimpleJdbcInsert`（`JdbcTemplate`的封装类）
+对于JDBCTemplate，可以借助`org.springframework.jdbc.core.simple.SimpleJdbcInsert`来解决
+
+> `SimpleJdbcInsert`是`JdbcTemplate`的一个封装类
 >
 > * 具体参考《Spring In Action 第5版》（即上一版）第3.1小节后半段的介绍
 > * 代码参考：[https://github.com/fangkun119/spring-in-action-5-samples/blob/master/ch03/tacos-jdbc/src/main/java/tacos/data/JdbcOrderRepository.java](https://github.com/fangkun119/spring-in-action-5-samples/blob/master/ch03/tacos-jdbc/src/main/java/tacos/data/JdbcOrderRepository.java)
+
+对于使用`Spring Data JDBC`，解决方法见3.2小节
 
 #### (3) `@SessionAttributes("order")`和`@ModelAttribute`
 
@@ -294,8 +301,8 @@
 >
 > ~~~xml
 > <dependency>
->   <groupId>org.springframework.boot</groupId>
->   <artifactId>spring-boot-starter-data-jdbc</artifactId>
+>   	<groupId>org.springframework.boot</groupId>
+>   	<artifactId>spring-boot-starter-data-jdbc</artifactId>
 > </dependency>
 > ~~~
 >
@@ -345,7 +352,7 @@
 >
 > [/src/main/java/.../Ingredient.java](../ch03/tacos-sd-jdbc/src/main/java/tacos/Ingredient.java)
 >
-> [/src/main/java/.../Ingredient.java](../ch03/tacos-sd-jdbc/src/main/java/tacos/Ingredient.java)
+> [/src/main/java/.../IngredientRef.java](../ch03/tacos-sd-jdbc/src/main/java/tacos/IngredientRef.java)
 
 ####  (1) 注解及例子
 
@@ -360,25 +367,26 @@
 > @EqualsAndHashCode(exclude = "createdAt") // lambok注解，见顶部的说明
 > @Table // 可选注解，用来指定DB表名：默认与类名相同，也可指定其他表例如@Table("Taco_Cloud_Taco")
 > public class Taco {
->         // @Id表名该列是CrudRepository<T, ID>中泛型参数ID所对应的property
->         @Id  
->         private Long id;
+> 	// @Id表名该列是CrudRepository<T, ID>中泛型参数ID所对应的property
+> 	@Id  
+> 	private Long id;
 > 
->         // 所有属性都默认映射到数据库中名称相对应的列（驼峰 -> 小写用下划线分隔单词）
->         // 也可以使用注解指定列名，例如@Column("create_at")
->         private Date createdAt = new Date();
+> 	// 所有属性都默认映射到数据库中名称相对应的列（驼峰 -> 小写用下划线分隔单词）
+> 	// 也可以使用注解指定列名，例如@Column("create_at")
+> 	private Date createdAt = new Date();
 > 
->         // 还可以添加java validation的注解，用于数据校验
->         @NotNull
->         @Size(min = 5, message = "Name must be at least 5 characters long")
->         private String name;
+> 	// 还可以添加java validation的注解，用于数据校验
+> 	@NotNull
+> 	@Size(min = 5, message = "Name must be at least 5 characters long")
+> 	private String name;
+> 	
+> 	// IngredientRef对象对应于ingredient_ref表的数据
+> 	@Size(min = 1, message = "You must choose at least 1 ingredient")
+> 	private List<IngredientRef> ingredients = new ArrayList<>();
 > 
->         @Size(min = 1, message = "You must choose at least 1 ingredient")
->         private List<IngredientRef> ingredients = new ArrayList<>();
-> 
->         public void addIngredient(Ingredient taco) {
->             this.ingredients.add(new IngredientRef(taco.getId()));
->         }
+> 	public void addIngredient(Ingredient taco) {
+> 		this.ingredients.add(new IngredientRef(taco.getId()));
+> 	}
 > }
 > ```
 >
@@ -386,7 +394,7 @@
 > // 对应的表名是ingredient_ref，并且该表没有ID列，因此也可以不加注解
 > @Data
 > public class IngredientRef {
->       private final String ingredient;
+> 	private final String ingredient;
 > }
 > ```
 
@@ -399,15 +407,106 @@
 > @RequestMapping("/design")
 > @SessionAttributes("tacoOrder")
 > public class DesignTacoController {
->     // 使用@Autowired注入
->        private final IngredientRepository ingredientRepo;
->        @Autowired
->        public DesignTacoController(IngredientRepository ingredientRepo) {
->             this.ingredientRepo = ingredientRepo;
->        }
->        ...
+> 	// 注入IngredientRepository
+>     private final IngredientRepository ingredientRepo;
+>     @Autowired
+>     public DesignTacoController(IngredientRepository ingredientRepo) {
+>          this.ingredientRepo = ingredientRepo;
+>     }
+>     ...
 > }
 > ```
+>
+> [/src/main/java/tacos/web/OrderController.java](../ch03/tacos-sd-jdbc/src/main/java/tacos/web/OrderController.java)
+>
+> ~~~java
+> @Controller
+> @RequestMapping("/orders")
+> @SessionAttributes("tacoOrder")
+> public class OrderController {
+>     // 注入OrderRepository
+> 	private OrderRepository orderRepo;
+>     @Autowired    
+> 	public OrderController(OrderRepository orderRepo) {
+> 		this.orderRepo = orderRepo;
+> 	}
+> 
+> 	...
+> 	
+> 	@PostMapping
+> 	public String processOrder(@Valid TacoOrder order, Errors errors, SessionStatus sessionStatus) {
+> 		// Spring Validate表单验证没有通过时，直接返回视图模板"orderForm"所对应的页面并显示错误提示
+>         if (errors.hasErrors()) {
+> 			return "orderForm";
+> 		}
+> 		// Order对象嵌套了List<IngredientRef>，执行save方法时，会向ingredient_ref和order两张表插入数据
+> 		orderRepo.save(order);
+> 		sessionStatus.setComplete();
+> 		return "redirect:/";
+> 	}
+> }
+> ~~~
+
+### 3.2.4 使用`CommandLineRunner`或者`ApplicationRunner`执行初始化操作
+
+> 除了`3.1.3.(2)`小节在resources目录下放置schema.sql和data.sql来让程序启动时自动初始化数据库，此操作还可以使用CommandLineRunner或ApplicationRunner实现，并且更加灵活应用范围更广
+>
+> 代码：[src/main/java/tacos/TacoCloudApplication.java](../ch03/tacos-sd-jdbc/src/main/java/tacos/TacoCloudApplication.java)
+
+#### (1) 使用方法
+
+> 声明一个类型为`CommandLineRunner`或者`ApplicationRunner`的Bean即可，Spring Boot在容器和所有Bean初始化完成但还没有运行程序时，会执行这两个Runner提供的方法
+
+CommandLineRunner例子
+
+> ~~~java
+> @Bean
+> public CommandLineRunner dataLoader(IngredientRepository repo) {
+> 	// @FunctionalInterface
+> 	// public interface CommandLineRunner {
+> 	//		void run(String... args) throws Exception;
+> 	// }
+> 	// args的类型是String参数列表，表示程序启动时的原始命令行参数
+> 	return args -> {
+> 		repo.save(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP));
+> 		repo.save(new Ingredient("COTO", "Corn Tortilla", Type.WRAP));
+> 		repo.save(new Ingredient("GRBF", "Ground Beef", Type.PROTEIN));
+> 		...
+> 		repo.save(new Ingredient("SRCR", "Sour Cream", Type.SAUCE));
+> 	};
+> }
+> ~~~
+
+ApplicationRunner的例子
+
+> ~~~java
+> @Bean
+> public ApplicationRunner dataLoader(IngredientRepository repo) {
+> 	// @FunctionalInterface
+> 	// public interface ApplicationRunner {
+> 	// 		void run(ApplicationArguments args) throws Exception;
+> 	// }
+> 	// args的类型是ApplicationArguments，是解析好的程序命令行参数
+> 	return args -> {
+> 		repo.save(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP));
+> 		repo.save(new Ingredient("COTO", "Corn Tortilla", Type.WRAP));
+> 		...
+> 		repo.save(new Ingredient("SRCR", "Sour Cream", Type.SAUCE));
+> 	};
+> }
+> ~~~
+>
+> 关于ApplicationArguments使用例子
+>
+> ~~~java
+> public ApplicationRunner dataLoader(IngredientRepository repo) {
+> 	return args -> {
+> 		// 一个命令行参数可能被指定多次，以列表的形式传入该参数的所有值
+> 		List<String> version = args.getOptionValues("version");
+> 		...
+> 	};
+> }
+> ~~~
 
 ## 3.3 使用`Spring Data JPA`
 
@@ -423,19 +522,19 @@
 >
 > ~~~xml
 > <dependency>
->   <groupId>org.springframework.boot</groupId>
->   <artifactId>spring-boot-starter-data-jpa</artifactId>
->   <exclusions>
->     <exclusion>
->         <groupId>org.hibernate</groupId>
->         <artifactId>hibernate-core</artifactId>
->     </exclusion>
->   </exclusions>
+> 	<groupId>org.springframework.boot</groupId>
+> 	<artifactId>spring-boot-starter-data-jpa</artifactId>
+> 	<exclusions>
+> 		<exclusion>
+> 			<groupId>org.hibernate</groupId>
+> 			<artifactId>hibernate-core</artifactId>
+> 		</exclusion>
+> 	</exclusions>
 > </dependency>
 > <dependency>
->   <groupId>org.eclipse.persistence</groupId>
->   <artifactId>org.eclipse.persistence.jpa</artifactId>
->   <version>2.7.6</version>
+> 	<groupId>org.eclipse.persistence</groupId>
+> 	<artifactId>org.eclipse.persistence.jpa</artifactId>
+> 	<version>2.7.6</version>
 > </dependency>
 > ~~~
 
@@ -455,14 +554,14 @@
 > // 并强制（force）所有字段被初始化为0/null/false
 > @NoArgsConstructor(access=AccessLevel.PRIVATE, force=true) 
 > public class Ingredient {
->       @Id //数据库table中表示id的列
->       private String id;
+>    	@Id //数据库table中表示id的列
+>    	private String id;
 >   
->       private String name;
->       private Type type;
->       public static enum Type {
+>    	private String name;
+>    	private Type type;
+>    	public static enum Type {
 >    		WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
->       }
+>    	}
 > }
 > ~~~
 >
@@ -472,19 +571,19 @@
 > @Data
 > @Entity
 > public class Taco {
->       // 使用Database的ID自增所产生的值
->       @Id
->       @GeneratedValue(strategy = GenerationType.AUTO) 
->       private Long id;
+>    	// 使用Database的ID自增所产生的值
+>    	@Id
+>    	@GeneratedValue(strategy = GenerationType.AUTO) 
+>    	private Long id;
 > 
->       ...
+>    	...
 > 
->       // 声明表映射关系为@ManyToMany
->       @Size(min=1, message="You must choose at least 1 ingredient")
->       @ManyToMany()
->       private List<Ingredient> ingredients = new ArrayList<>();
+>    	// 声明表映射关系为@ManyToMany
+>    	@Size(min=1, message="You must choose at least 1 ingredient")
+>    	@ManyToMany()
+>    	private List<Ingredient> ingredients = new ArrayList<>();
 > 
->       ...
+>    	...
 > }
 > ~~~
 >
@@ -494,10 +593,10 @@
 > @Data
 > @Entity
 > public class TacoOrder implements Serializable {
->       ...
->       // 声明表映射关系为@OneToMany
->       @OneToMany(cascade = CascadeType.ALL)
->       private List<Taco> tacos = new ArrayList<>();
+>    	...
+>    	// 声明表映射关系为@OneToMany
+>    	@OneToMany(cascade = CascadeType.ALL)
+>    	private List<Taco> tacos = new ArrayList<>();
 > }
 > ~~~
 
@@ -528,7 +627,7 @@
 
 方法签名结构:
 
-> ![](https://raw.githubusercontent.com/kenfang119/pics/main/002_spring_boot/spring_in_action_6_ch3_jpa_dsl_structure.jpg)
+> <div align="left"><img src="https://raw.githubusercontent.com/kenfang119/pics/main/002_spring_boot/spring_in_action_6_ch3_jpa_dsl_structure.jpg" width="600" /></div>
 >
 > * 上图中的"Orders"（订单）是主语，在DSL中是可选的，多数情况下会被忽略，因为返回值`List<TacoOrder>`已经说明了主语的内容
 > * 注意3个参数与`By`，`Between`的关系
