@@ -50,8 +50,8 @@
 > ~~~xml
 > <!-- 用于non-reactive数据持久化的cassandra的starter -->
 > <dependency>
->   <groupId>org.springframework.boot</groupId>
->   <artifactId>spring-boot-starter-data-cassandra</artifactId>
+>   	<groupId>org.springframework.boot</groupId>
+>   	<artifactId>spring-boot-starter-data-cassandra</artifactId>
 > </dependency>
 > ~~~
 

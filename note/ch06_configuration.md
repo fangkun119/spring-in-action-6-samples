@@ -63,11 +63,11 @@
 > ~~~java
 > @Bean
 > public DataSource dataSource() {
->   return new EmbeddedDatabaseBuilder()
->       .setType(H2)
->       .addScript("taco_schema.sql")
->       .addScripts("user_data.sql", "ingredient_data.sql")
->       .build();
+> 	return new EmbeddedDatabaseBuilder()
+> 		.setType(H2)
+> 		.addScript("taco_schema.sql")
+> 		.addScripts("user_data.sql", "ingredient_data.sql")
+> 		.build();
 > }
 > ~~~
 >
@@ -90,6 +90,7 @@
 > * 操作系统环境变量
 > * 命令行参数
 > * 应用属性配置文件（application.properties，application.yml，……）
+> * 微服务中的config service
 
 例如想要更改程序的默认端口，以下4种方法都可以
 
@@ -103,7 +104,7 @@
 >
 > ~~~yml
 > server:
->   port: 9090
+> 	port: 9090
 > ~~~
 >
 > 命令行参数
@@ -114,7 +115,11 @@
 >
 > 环境变量（格式略有不同，Spring会自动把SERVER_PORT转换成server.port
 >
-> 另外还有第14章介绍的配置中心
+> ~~~bash
+> $ export SERVER_PORT=9090
+> ~~~
+>
+> 微服务的config service（第14章介绍）
 
 ### 6.1.2 配置DataSource
 
@@ -122,47 +127,45 @@
 
 > 之前的代码，在开发环境下使用嵌入式内存数据库，现在需要为生产环境配置MySQL数据库
 >
-> 代码位置：[/src/main/resources/application.yml](/src/main/resources/application.yml)
+> 代码位置：[/src/main/resources/application.yml](../ch06/taco-cloud/src/main/resources/application.yml)
 >
 > ~~~yml
 > ---
 > spring:
->   profiles: prod
->   datasource:
->     url: jdbc:mysql://localhost/tacocloud
->     username: tacouser
->     password: tacopassword
->     # driver-class-name: com.mysql.jdbc.Driver
+>   	profiles: prod
+>   	datasource:
+>    		url: jdbc:mysql://localhost/tacocloud
+>    		username: tacouser
+>    		password: tacopassword
+>    		# 没有配置driver-class-name时、Spring根据url自动推断并在class path中查找可用的driver class
+> 		# * 首选HikariCP Connection Pool
+>		# * 次选Tomcat JDBC Connection Pool
+> 		# * 以及Apache Commons DBCP2
+>		# 如果需要、也可以自己指定，例如下面的代码
+> 		# driver-class-name: com.mysql.jdbc.Driver
 > ~~~
->
-> 没有配置driver-class-name时、Spring根据url自动推断并在class path中查找可用的driver class
->
-> * 首选HikariCP Connection Pool
-> * 其次选择Tomcat JDBC Connection Pool
-> * 以及Apache Commons DBCP2
->
-> 如果需要、也可以自己指定`driver-class-name`，如上面代码的注释部分
+> 
 
 #### (2) 声明应用程序启动时要执行的数据库初始化脚本
 
 > ~~~yml
 > spring:
->   datasource:
->     schema:
->     - order-schema.sql
->     - ingredient-schema.sql
->     - taco-schema.sql
->     - user-schema.sql
->     data:
->     - ingredients.sql
+>   	datasource:
+>    		schema:
+> 		- order-schema.sql
+> 		- ingredient-schema.sql
+> 		- taco-schema.sql
+> 		- user-schema.sql
+> 		data:
+> 		- ingredients.sql
 > ~~~
 
 #### (3) 使用存储在JNDI中的数据库配置
 
 > ~~~yml
 > spring:
->   datasource:
->     jndi-name: java:/comp/env/jdbc/tacoCloudDS
+>   	datasource:
+>    		jndi-name: java:/comp/env/jdbc/tacoCloudDS
 > ~~~
 >
 > 一旦设置了`spring.datasource.jndi-name`，其他的DB Connection配置会被忽略
@@ -171,7 +174,11 @@
 
 #### (1) 随机端口配置
 
-> 将server.port配置为0时，程序会使用随机端口，通常用在自动化集测试中以同时运行多个测试 ，另外在使用微服务时也会使用随机端口、然后通过service registy查找端口
+> 将`server.port`配置为0时：
+>
+> * 程序会使用随机端口，通常用在自动化集测试中以同时运行多个测试 
+>
+> * 另外在微服务中有时也会使用随机端口、因为可以通过service registry查找端口，所以并不会在意配置了什么端口
 
 #### (2) 让程序支持HTTPS
 
@@ -185,13 +192,13 @@
 >
 > ~~~yml
 > server:
->   port: 8443
->   ssl:
->     # key-store指向上一步生成的文件，如果该文件打包在jar包中，需要把file:改成classpath:
->     key-store: file:///path/to/mykeys.jks 
->     # 下面的两个password为生成jks文件时输入的密码  
->     key-store-password: letmein
->     key-password: letmein
+>   	port: 8443
+>   	ssl:
+>    		# key-store指向上一步生成的文件，如果该文件打包在jar包中，需要把file:改成classpath:
+>    		key-store: file:///path/to/mykeys.jks 
+>    		# 下面的两个password为生成jks文件时输入的密码  
+>    		key-store-password: letmein
+>    		key-password: letmein
 > ~~~
 
 ### 6.1.4 日志配置 
@@ -224,34 +231,34 @@
 
 > ~~~yml
 > logging:
->   level:
->     root: WARN
->     org:
->       springframework:
->         security: DEBUG
+>   	level:
+>    		root: WARN
+>    		org:
+>    			springframework:
+>    				security: DEBUG
 > ~~~
 >
 > 或者下面可读性更强的书写方式 
 >
 > ~~~yml
 > logging:
->   level:
->     root: WARN  #默认日志等级为WARN
->     org.springframework.security: DEBUG #来自security包的日志等级为DEBUG
+>   	level:
+>    		root: WARN  # 默认日志等级为WARN
+>    		org.springframework.security: DEBUG # 来自security包的日志等级为DEBUG
 > ~~~
 
 #### (3) 配置日志输出文件
 
 > ~~~yml
 > logging:
->   file:
->     path: /var/logs/
->     file: TacoCloud.log
->   level:
->     root: WARN
->     org:
->       springframework:
->         security: DEBUG
+>   	file:
+>    		path: /var/logs/
+>    		file: TacoCloud.log
+>   	level:
+>    		root: WARN
+>    		org:
+>    			springframework:
+>    				security: DEBUG
 > ~~~
 >
 > 该配置会把日志写入到/var/logs/TacoCloud.log（注意确保程序有权限写这个目录），使用默认的10MB日志文件rotate size
@@ -262,7 +269,7 @@
 
 > ~~~yml
 > greeting:
->   welcome: You are using ${spring.application.name}.
+>   	welcome: You are using ${spring.application.name}.
 > ~~~
 
 ## 6.2 创建自己的Configuration Properties
@@ -273,11 +280,15 @@
 
 #### (1) 添加dependency和exclusion
 
-> 需要在[pom.xml](../ch06/taco-cloud/pom.xml)中添加dependency和exclusion以支持configuration properties（可能在后续Spring Boot版本中将不再需要）
->
-> * 添加内容：https://github.com/fangkun119/spring-in-action-6-samples/commit/df2da636abebe1b8c8f023d0dbe00d75b808ba95?branch=df2da636abebe1b8c8f023d0dbe00d75b808ba95&diff=unified
->
-> * 相关文档：https://docs.spring.io/spring-boot/docs/2.4.0/reference/html/appendix-configuration-metadata.html#configuration-metadata-annotation-processor
+需要在[pom.xml](../ch06/taco-cloud/pom.xml)中添加dependency和exclusion以支持configuration properties（可能在后续Spring Boot版本中将不再需要）
+
+添加内容：
+
+> https://github.com/fangkun119/spring-in-action-6-samples/commit/df2da636abebe1b8c8f023d0dbe00d75b808ba95?branch=df2da636abebe1b8c8f023d0dbe00d75b808ba95&diff=unified
+
+相关文档：
+
+> https://docs.spring.io/spring-boot/docs/2.4.0/reference/html/appendix-configuration-metadata.html#configuration-metadata-annotation-processor
 
 #### (2) 编写Configuration Properties
 
@@ -295,9 +306,9 @@
 > @Data
 > @Validated
 > public class OrderProps {
->   @Min(value=5,  message="must be between 5 and 25")
->   @Max(value=25, message="must be between 5 and 25")
->   private int pageSize = 20; // 默认值20，可以被小节(3)的配置覆盖
+>   	@Min(value=5,  message="must be between 5 and 25")
+>   	@Max(value=25, message="must be between 5 and 25")
+>   	private int pageSize = 20; // 默认值20，可以被小节(3)的配置覆盖
 > }
 > ```
 
@@ -310,26 +321,23 @@
 > @RequestMapping("/orders")
 > @SessionAttributes("order")
 > public class OrderController {
->     // 注入OrderProps props
->     private OrderRepository orderRepo;
->     private OrderProps props;
->     public OrderController(OrderRepository orderRepo, OrderProps props) {
->         this.orderRepo = orderRepo;
->         this.props = props;
->     }
-> 
->     ...
-> 
-> 	@GetMapping
->     public String ordersForUser(@AuthenticationPrincipal User user, Model model) {
->         // 使用OrderProps props
->         Pageable pageable = PageRequest.of(0, props.getPageSize());
->         model.addAttribute("orders",
->                 orderRepo.findByUserOrderByPlacedAtDesc(user, pageable));
->         return "orderList";
->     }
-> }
-> ```
+>    	// 注入OrderProps props
+>    	private OrderRepository orderRepo;
+>    	private OrderProps props;
+>    	public OrderController(OrderRepository orderRepo, OrderProps props) {
+>    		this.orderRepo = orderRepo;
+>    		this.props = props;
+>    	}
+> 	...
+>    	@GetMapping
+> 	public String ordersForUser(@AuthenticationPrincipal User user, Model model) {
+> 		// 使用OrderProps props
+>    		Pageable pageable = PageRequest.of(0, props.getPageSize());
+>    		model.addAttribute("orders", orderRepo.findByUserOrderByPlacedAtDesc(user, pageable));
+>    		return "orderList";
+>    	}
+>    }
+>    ```
 
 #### (4) 给Configuration Properties填写配置值
 
@@ -337,8 +345,8 @@
 >
 > ```java
 > taco:
->   orders:
->     pageSize: 10
+>   	orders:
+>    		pageSize: 10
 > ```
 >
 > 或者使用环境变量
@@ -357,21 +365,18 @@
 >
 > ~~~json
 > {
->   "properties": [
->     {
->       "name": "taco.orders.pageSize",
->       "type": "java.lang.String",
->       "description": "Sets the maximum number of orders to display in a list."
->     },
->     {
->       "name": "taco.discount.codes",
->       "type": "java.util.Map<String, Integer>",
->       "description": "A map of discount codes to a discount percentage."
->     }
->   ]
-> }
-> ~~~
->
+>   	"properties": [{
+>    		"name": "taco.orders.pageSize",
+>    		"type": "java.lang.String",
+>    		"description": "Sets the maximum number of orders to display in a list."
+>    	}, {
+>    		"name": "taco.discount.codes",
+>    		"type": "java.util.Map<String, Integer>",
+>    		"description": "A map of discount codes to a discount percentage."
+>    	}]
+>    }
+>    ~~~
+>   
 > 如果使用STS（Spring Tool Suite）、在缺少元数据声明时，IDE会提示并提供quick-fix提示框来快速跳转到配置文件上
 
 #### (2) 用途
@@ -404,32 +409,32 @@
 > ~~~yml
 > # 默认配置
 > spring:
->   security:
->     user:
->       name: buzz
->       password: infinity
->   datasource:
->     generate-unique-name: false
->     name: tacocloud
+>   	security:
+>    		user:
+>    			name: buzz
+>    			password: infinity
+>   	datasource:
+>    		generate-unique-name: false
+>    		name: tacocloud
 > taco:
->   orders:
->     pageSize: 10
->   discount:
->     codes:
->       abcdef: 10
+>   	orders:
+>    		pageSize: 10
+>   	discount:
+>    		codes:
+>    			abcdef: 10
 > 
 > # 环境之间的分割线
 > ---
 > spring:
->   # 环境名称
->   profiles: prod
->   datasource:
->     url: jdbc:mysql://localhost/tacocloud
->     username: tacouser
->     password: tacopassword
-> logging:
->   level:
->     tacos: WARN
+>   	# 环境名称
+>   	profiles: prod
+>   	datasource:
+>    		url: jdbc:mysql://localhost/tacocloud
+>    		username: tacouser
+>    		password: tacopassword
+> 	logging:
+>   		level:
+>     			tacos: WARN
 > ~~~
 
 ### 6.3.2  使用`pring.profiles.active`配置激活profile
@@ -440,9 +445,9 @@
 >
 > ~~~yml
 > spring:
->   profiles:
->     active:
->     - prod
+>   	profiles:
+>    		active:
+> 		- prod
 > ~~~
 >
 > 或者使用环境变量
@@ -469,11 +474,11 @@
 >
 > ~~~yml
 > spring:
->   profiles:
->     active:
->     - prod
->     - audit
->     - ha
+>   	profiles:
+>    		active:
+> 		- prod
+> 		- audit
+> 		- ha
 > ~~~
 >
 > 这样可以在部署到特定环境时激活一些特定配置，例如部署在Cloud Foundry时一个名为cloud的profile会被自动激活
@@ -491,34 +496,34 @@
 > @Profile("!prod")
 > @Configuration
 > public class DevelopmentConfig {
->     // CommandLineRunner Bean
->     // 用来在启动应用时加载嵌入式数据库和填充数据库
->     @Bean
->     // @Profile({"!prod", "!qa"})
->     // @Profile({"dev",    "qa"}) 
->     // 上面两个注解不需要了，已经在Config Class上添加了@Profile注解
->     public CommandLineRunner dataLoader(IngredientRepository repo, UserRepository userRepo, PasswordEncoder encoder) { // user repo for ease of testing with a built-in user
->         return new CommandLineRunner() {
->             @Override
->             public void run(String... args) throws Exception {
->                 repo.deleteAll();
->                 userRepo.deleteAll();
->                 repo.save(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP));
->                 repo.save(new Ingredient("COTO", "Corn Tortilla", Type.WRAP));
->                 repo.save(new Ingredient("GRBF", "Ground Beef", Type.PROTEIN));
->                 repo.save(new Ingredient("CARN", "Carnitas", Type.PROTEIN));
->                 repo.save(new Ingredient("TMTO", "Diced Tomatoes", Type.VEGGIES));
->                 repo.save(new Ingredient("LETC", "Lettuce", Type.VEGGIES));
->                 repo.save(new Ingredient("CHED", "Cheddar", Type.CHEESE));
->                 repo.save(new Ingredient("JACK", "Monterrey Jack", Type.CHEESE));
->                 repo.save(new Ingredient("SLSA", "Salsa", Type.SAUCE));
->                 repo.save(new Ingredient("SRCR", "Sour Cream", Type.SAUCE));
->                 userRepo.save(new User("habuma", encoder.encode("password"),
+>    	// CommandLineRunner Bean
+>    	// 用来在启动应用时加载嵌入式数据库和填充数据库
+>    	@Bean
+>    	// @Profile({"!prod", "!qa"})
+>    	// @Profile({"dev",    "qa"}) 
+>    	// 上面两个注解不需要了，已经在Config Class上添加了@Profile注解
+>    	public CommandLineRunner dataLoader(IngredientRepository repo, UserRepository userRepo, PasswordEncoder encoder) { // user repo for ease of testing with a built-in user
+>    		return new CommandLineRunner() {
+>    			@Override
+>    			public void run(String... args) throws Exception {
+>    				repo.deleteAll();
+>    				userRepo.deleteAll();
+>    				repo.save(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP));
+>    				repo.save(new Ingredient("COTO", "Corn Tortilla", Type.WRAP));
+>    				repo.save(new Ingredient("GRBF", "Ground Beef", Type.PROTEIN));
+>    				repo.save(new Ingredient("CARN", "Carnitas", Type.PROTEIN));
+>    				repo.save(new Ingredient("TMTO", "Diced Tomatoes", Type.VEGGIES));
+>    				repo.save(new Ingredient("LETC", "Lettuce", Type.VEGGIES));
+>    				repo.save(new Ingredient("CHED", "Cheddar", Type.CHEESE));
+>    				repo.save(new Ingredient("JACK", "Monterrey Jack", Type.CHEESE));
+>    				repo.save(new Ingredient("SLSA", "Salsa", Type.SAUCE));
+>    				repo.save(new Ingredient("SRCR", "Sour Cream", Type.SAUCE));
+>    				userRepo.save(new User("habuma", encoder.encode("password"),
 >                         "Craig Walls", "123 North Street", "Cross Roads", "TX",
 >                         "76227", "123-123-1234"));
->             }
->         };
->     }
+>    			}
+>    		};
+>    	}
 > }
 > ```
 

@@ -44,8 +44,6 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-
-
 > * 格式形如`1.2.1`的章节序号为原书的章节序号
 > * 格式形如`(1)/(2)/(3)`的章节序号为在笔记中展开的内容
 
@@ -58,30 +56,36 @@ Demo项目
 >     ```java
 >     @Configuration
 >     public class SecurityConfig extends WebSecurityConfigurerAdapter {
->       @Autowired
->       private UserDetailsService userDetailsService;
->       @Override
->       protected void configure(HttpSecurity http) throws Exception {...}
->       @Bean
->       public PasswordEncoder encoder() {...}
->       @Override
->       protected void configure(AuthenticationManagerBuilder auth) throws Exception {... }
+>         @Autowired
+>     	private UserDetailsService userDetailsService;
+>     	@Bean
+>     	public PasswordEncoder encoder() {...}    
+>     	
+>     	//继承WebSecurityConfigurerAdapter并覆盖configure方法
+>         @Override
+>     	protected void configure(HttpSecurity http) throws Exception {...}
+>     	@Override
+>     	protected void configure(AuthenticationManagerBuilder auth) throws Exception {... }
 >     }
 >     ```
 >
-> * [../ch05/taco-cloud-sfc/](../ch05/taco-cloud-sfc/)：与当前这版Spring In Action相配套的代码，其[SecurityConfig.java](../ch05/taco-cloud-sfc/src/main/java/tacos/security/SecurityConfig.java)为
+> * [../ch05/taco-cloud-sfc/](../ch05/taco-cloud-sfc/)：与当前（Spring In Action第6版）相配套的代码，其[SecurityConfig.java](../ch05/taco-cloud-sfc/src/main/java/tacos/security/SecurityConfig.java)为
 >
 >     ```java
 >     @Configuration
 >     public class SecurityConfig {
->       @Bean
->       public PasswordEncoder passwordEncoder() {...}
->       @Bean
->       public UserDetailsService userDetailsService(UserRepository userRepo) { ... }
->       @Bean
->       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { ... }
+>     	@Bean
+>     	public PasswordEncoder passwordEncoder() {...}
+>     	@Bean
+>     	public UserDetailsService userDetailsService(UserRepository userRepo) { ... }
+>     
+>         // 创建SecurityFilterChain Bean
+>         @Bean
+>     	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { ... }
 >     }
 >     ```
+>     
+>     具体说明见接下来的小节
 
 ## 5.1 引入Spring Security
 
@@ -100,86 +104,87 @@ Demo项目
 >
 > * 所有的HTTP请求路径都开启了认证
 > * 没有特定的角色和权限、没有登录页面、认证通过HTTP basic认证对话框实现
-> * 系统只有一个用户，用户ing为user
+> * 系统只有一个用户，用户名为user
 >
 > 接下来还需要修改程序、使其具有完整的权限、注册、登录认证功能
 
 ## 5.2 配置spring Security
 
-### (1) 配置：`PasswordEncoder`，`UserDetailsService`部分
+### (1) 配置`PasswordEncoder`和`UserDetailsService`
 
-> 使用Java Config类，会比XML配置更加方便
->
+用来对密码明文进行编码、以及从后端用户存储获取用户信息
+
 > [/src/main/java/.../security/SecurityConfig.java](../ch05/taco-cloud-sfc/src/main/java/tacos/security/SecurityConfig.java)
 >
 > ~~~java
 > @Configuration
 > public class SecurityConfig {
->       // 会在User注册以及登录认证时都被使用，用于对密码编码，防止在数据库中存储密码明文
->       // 具体操作通过PasswordEncoder接口的matches方法来进行
->       @Bean
->       public PasswordEncoder passwordEncoder() {
->             return new BCryptPasswordEncoder();
->             // 可选的Password编码器包括
->             // * BCryptPasswordEncoder：bccrypt Strong Hashing Encryption
->             // * NoOpPasswordEncoder：无编码，会在数据库中存储密码明文
->             // * Pbkdf2PasswordEncoder：PBKDF2 Encryption
->             // * SCryptPasswordEncoder：Scrypt Hashing Encryption
->             // * StandardPasswordEncoder：SHA-256 Hashing Encryption
->       }
+> 	// 会在User注册以及登录认证时都被使用，用于对密码编码，防止在数据库中存储密码明文
+> 	// 具体操作通过PasswordEncoder接口的matches方法来进行
+> 	@Bean
+> 	public PasswordEncoder passwordEncoder() {
+> 		return new BCryptPasswordEncoder();
+> 		// 可选的Password编码器包括
+> 		// * BCryptPasswordEncoder：bccrypt Strong Hashing Encryption
+> 		// * NoOpPasswordEncoder：无编码，会在数据库中存储密码明文
+> 		// * Pbkdf2PasswordEncoder：PBKDF2 Encryption
+> 		// * SCryptPasswordEncoder：Scrypt Hashing Encryption
+> 		// * StandardPasswordEncoder：SHA-256 Hashing Encryption
+> 	}
 > 
->       // 用户认证时需要获取用户信息，因此定义一个Service Bean来执行该操作
->       @Bean
->       public UserDetailsService userDetailsService(UserRepository userRepo) {
->             // 这个Lambda表达式实现了函数式接口UserDetailsService
->             return username -> {
->               // User是UserDetails接口的实现类
->               // userRepo：可以使用JDBC、LDAP等实现
->               User user = userRepo.findByUsername(username);
->               if (user != null) {
->                 return user;
->               }
->               // UserDetailsService.loadUserByUsername要求永远不返回null
->               // 因此当user为null时，抛出UsernameNotFoundException
->               throw new UsernameNotFoundException("User '" + username + "' not found");
->             };
->       }
+> 	// 用户认证时需要获取用户信息，因此定义一个Service Bean来执行该操作
+> 	@Bean
+> 	public UserDetailsService userDetailsService(UserRepository userRepo) {
+> 		// 这个Lambda表达式实现了函数式接口UserDetailsService
+> 		return username -> {
+> 			// User是UserDetails接口的实现类
+> 			// userRepo：可以使用JDBC、LDAP等实现
+> 			User user = userRepo.findByUsername(username);
+> 			if (user != null) {
+> 				return user;
+> 			}
+> 			// UserDetailsService.loadUserByUsername要求永远不返回null
+> 			// 因此当user为null时，抛出UsernameNotFoundException
+> 			throw new UsernameNotFoundException("User '" + username + "' not found");
+> 		};
+> 	}
 > 
->       @Bean
->       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
->           // 指定哪些http请求需要安全认证
->           ...
->       }
+> 	@Bean
+> 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+> 		// 指定哪些http请求需要安全认证
+> 		...
+> 	}
 > }
 > ~~~
-
-### (2) 相关的接口
-
-`UserDetailsService`接口
-
-> ```java
+>
+> 相关的接口如下
+>
+> `UserDetailsService`接口
+>
+> ~~~java
 > package org.springframework.security.core.userdetails;
 > public interface UserDetailsService {
->         // Params: username – the username identifying the user whose data is required.
->         // Returns: a fully populated user record (never null)
->         // Throws: UsernameNotFoundException – if the user could not be found or the user has no GrantedAuthorit
->         UserDetails loadUserByUsername(String var1) throws UsernameNotFoundException;
+> 	// Params: username – the username identifying the user whose data is required.
+> 	// Returns: a fully populated user record (never null)
+> 	// Throws: UsernameNotFoundException – if the user could not be found or the user has no GrantedAuthorit
+> 	UserDetails loadUserByUsername(String var1) throws UsernameNotFoundException;
 > }
-> ```
-
-`UserDetails`接口
-
-> ```java
+> ~~~
+>
+> `UserDetails`接口
+>
+> ~~~java
 > public interface UserDetails extends Serializable {
->        Collection<? extends GrantedAuthority> getAuthorities();	//用户权限，GrantedAuthority接口只有一个String getAuthority()方法
->        String getPassword();   // 密码
->        String getUsername();   // 用户名
->        boolean isAccountNonExpired();  		// 用户没有过期
->        boolean isAccountNonLocked();   		// 用户没有处于锁定状态
->        boolean isCredentialsNonExpired();   // 用户的密码没有过期
->        boolean isEnabled();    // 用户是否被enable，未被enable的用户不能参与认证
+> 	// 用户权限，GrantedAuthority接口只有一个String getAuthority()方法
+> 	Collection<? extends GrantedAuthority> getAuthorities();
+> 	String getPassword();   			// 密码
+> 	String getUsername();   			// 用户名
+> 	boolean isAccountNonExpired();  	// 用户没有过期
+> 	boolean isAccountNonLocked();   	// 用户没有处于锁定状态
+> 	boolean isCredentialsNonExpired();  // 用户的密码没有过期
+> 	boolean isEnabled();    			// 用户是否被enable，未被enable的用户不能参与认证
 > }
-> ```
+> ~~~
 
 ### 5.2.1 基于内存的User Store
 
@@ -189,9 +194,9 @@ Demo项目
 
 > 使用Spring Data Repository，以数据库作为用户信息存储
 
-#### (1) 定义用户信息的Domain Object
+#### (1) Domain Object：`UserDetails`
 
-> Domain Object：实现了上面的`UserDetails`接口
+> Domain Object：上面`UserDetailsService Bean`的方法`getAutorities()`返回的`UserDetails`对象
 >
 > ~~~java
 > @Entity //JPA注解
@@ -199,56 +204,57 @@ Demo项目
 > @NoArgsConstructor(access=AccessLevel.PRIVATE, force=true)
 > @RequiredArgsConstructor
 > public class User implements UserDetails {
->       private static final long serialVersionUID = 1L;
+> 	private static final long serialVersionUID = 1L;
 > 
->       @Id
->       @GeneratedValue(strategy=GenerationType.AUTO)  //使用database自增ID
->       private Long id;
+> 	@Id
+> 	@GeneratedValue(strategy=GenerationType.AUTO)  //使用database自增ID
+> 	private Long id;
 > 
->       private final String username;
->       private final String password;
->       private final String fullname;
->       private final String street;
->       private final String city;
->       private final String state;
->       private final String zip;
->       private final String phoneNumber;
+> 	private final String username;
+> 	private final String password;
+> 	private final String fullname;
+> 	private final String street;
+> 	private final String city;
+> 	private final String state;
+> 	private final String zip;
+> 	private final String phoneNumber;
 > 
->       // 返回授予该用户的权限
->       @Override
->       public Collection<? extends GrantedAuthority> getAuthorities() {
->         // org.springframework.security.core.authority.SimpleGrantedAuthority
->         // * @Override 
->         // * public String getAuthority() {return this.role;}
->         return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
->       }
+> 	// 返回授予该用户的权限
+> 	@Override
+> 	public Collection<? extends GrantedAuthority> getAuthorities() {
+> 		// org.springframework.security.core.authority.SimpleGrantedAuthority
+> 		// * @Override 
+> 		// * public String getAuthority() {return this.role;}
+> 		return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+> 	}
 > 
->       @Override
->       public boolean isAccountNonExpired() { return true;}
->       @Override
->       public boolean isAccountNonLocked() {return true;}
->       @Override
->       public boolean isCredentialsNonExpired() {return true;}
->       @Override
->       public boolean isEnabled() {return true;}
+> 	@Override
+> 	public boolean isAccountNonExpired() { return true;}
+> 	@Override
+> 	public boolean isAccountNonLocked() {return true;}
+> 	@Override
+> 	public boolean isCredentialsNonExpired() {return true;}
+> 	@Override
+> 	public boolean isEnabled() {return true;}
 > }
 > ~~~
 
-#### (2) 定义用户Domain Object的持久化：`UserRepository`
+#### (2) Domain Object的持久化：`UserRepository`
 
-> 使用Spring Data JPA，定义repository接口后，框架会自动实现该接口
->
+持久化上面的UserDetails对象
+
 > 代码：[/src/main/java/.../data/UserRepository.java](../ch05/taco-cloud-sfc/src/main/java/tacos/data/UserRepository.java)
 >
 > ~~~java
+>// 使用Spring Data JPA，定义repository接口后，框架会自动实现该接口
 > public interface UserRepository extends CrudRepository<User, Long> {
->       // 只提供一个自定义方法 ，框架使用方法名推断来提供实现
->       // 其他的方法，例如save(User)，来自父接口CrudRepository<User, Long>    
->       User findByUsername(String username);
-> }
+> 	// 只提供一个自定义方法 ，框架使用方法名推断来提供实现
+>    	// 其他的方法，例如save(User)，来自父接口CrudRepository<User, Long>    
+>    	User findByUsername(String username);
+>    }
 > ~~~
->
-> 关于Service层，没有专门编写Service类，而是如`5.2.(1)`小所述，节采用`使用lambda表达式实现函数式接口`的方式，配置在 [/src/main/java/.../security/SecurityConfig.java](../ch05/taco-cloud-sfc/src/main/java/tacos/security/SecurityConfig.java)中
+> 
+>关于Service层，没有专门编写Service类，而是如`5.2.(1)`小所述，节采用`使用lambda表达式实现函数式接口`的方式，配置在 [/src/main/java/.../security/SecurityConfig.java](../ch05/taco-cloud-sfc/src/main/java/tacos/security/SecurityConfig.java)中
 
 #### (3) 用户注册
 
@@ -270,16 +276,16 @@ Demo项目
 > @Controller
 > @RequestMapping("/register")
 > public class RegistrationController {
->       ...
->       @GetMapping
->       public String registerForm() {return "registration";}
+>    	...
+>    	@GetMapping
+>    	public String registerForm() {return "registration";}
 >   
->       @PostMapping
->       public String processRegistration(RegistrationForm form) {
->             // 密码被编码后存储
->             userRepo.save(form.toUser(passwordEncoder));
->             return "redirect:/login";
->       }
+>    	@PostMapping
+>    	public String processRegistration(RegistrationForm form) {
+>    		// 密码被编码后存储
+>    		userRepo.save(form.toUser(passwordEncoder));
+>    		return "redirect:/login";
+>    	}
 > }
 > ~~~
 >
@@ -288,15 +294,15 @@ Demo项目
 > ```java
 > @Data
 > public class RegistrationForm {
->       private String username;
->       private String password;
->       ...
->       // 密码转码：从明文密码转成加密后的字符串、以避免在数据库中存储密码明文
->       public User toUser(PasswordEncoder passwordEncoder) {
->             return new User(
->                 username, passwordEncoder.encode(password), 
->                 fullname, street, city, state, zip, phone);
->       }
+>    	private String username;
+>    	private String password;
+>    	...
+>    	// 密码转码：从明文密码转成加密后的字符串、以避免在数据库中存储密码明文
+>    	public User toUser(PasswordEncoder passwordEncoder) {
+>    		return new User(
+>    			username, passwordEncoder.encode(password), 
+>    			fullname, street, city, state, zip, phone);
+>    	}
 > }
 > ```
 
@@ -435,16 +441,16 @@ Demo项目
 > 
 >   @Bean
 >   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
->        return http
->            ...
->            // 登录页为/login，其它使用了默认配置
->            // * 用户名和密码使用约定的参数名username和password
->            // * 处理登录POST请求的url路径为同名路径/login
->            // * 登录成功后跳转回触发登录的页面，如果直接在浏览器输入/login登录则跳转到首页"/"
->            // 视图模板/src/main/resources/templates/login.html的代码也必须准寻相同的命名约定
->            .and().formLogin().loginPage("/login")
->            ...
->            .and().build();
+>    	return http
+>    		...
+>    		// 登录页为/login，其它使用了默认配置
+>    		// * 用户名和密码使用约定的参数名username和password
+>    		// * 处理登录POST请求的url路径为同名路径/login
+>    		// * 登录成功后跳转回触发登录的页面，如果直接在浏览器输入/login登录则跳转到首页"/"
+>    		// 视图模板/src/main/resources/templates/login.html的代码也必须准寻相同的命名约定
+>    		.and().formLogin().loginPage("/login")
+>    		...
+>    		.and().build();
 >       }
 > }
 > ~~~
@@ -504,8 +510,8 @@ Demo项目
 
 > ~~~xml
 > <dependency>
->   <groupId>org.springframework.boot</groupId>
->   <artifactId>spring-boot-starter-oauth2-client</artifactId>
+>   	<groupId>org.springframework.boot</groupId>
+>   	<artifactId>spring-boot-starter-oauth2-client</artifactId>
 > </dependency>
 > ~~~
 
@@ -515,30 +521,30 @@ Demo项目
 >
 > ~~~yml
 > spring:
->   security:
->     oauth2:
->       client:
->         registration:
->           <oauth2 or openid provider name>:
->             clientId: <client id>
->             clientSecret: <client secret>
->             scope: <comma-separated list of requested scopes>
+>   	security:
+>    		oauth2:
+>    			client:
+>    				registration:
+>    					<oauth2 or openid provider name>:
+>    						clientId: <client id>
+>    						clientSecret: <client secret>
+>    						scope: <comma-separated list of requested scopes>
 > ~~~
 >
 > 例如，如果想通过Facebook来登录，可以在application.yml做如下配置
 >
 > ~~~yml
 > spring:
->   security:
->     oauth2:
->       client:
->         registration:
->           facebook:
->             # 通过https://developers.facebook.com/来获取clientId和clientSecret
->             clientId: <facebook client id>
->             clientSecret: <facebook client secret>
->             # 允许应用在用户登录访问他们的email和profile信息
->             scope: email, public_profile
+>   	security:
+>    		oauth2:
+>    			client:
+>    				registration:
+>    					facebook:
+>    						# 通过https://developers.facebook.com/来获取clientId和clientSecret
+>    						clientId: <facebook client id>
+>    						clientSecret: <facebook client secret>
+>    						# 允许应用在用户登录访问他们的email和profile信息
+>    						scope: email, public_profile
 > ~~~
 >
 > 对于使用了`SecurityFilterChain`的应用，还需要把oauth2Login配置在filter chain中，例如
@@ -617,7 +623,7 @@ Demo项目
 >     <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
 >     ~~~
 >
-> * 其实如果使用的是`Thymeleaf`或`Spring MVC's JSP tag library`，甚至可以不同添加上面的隐藏域，视图引擎会在渲染时自动加上"_csrf"字段 。以Thymeleaf为例、唯一要做的是，表单中至少有一个字段使用了Thymeleaf的`th:`前缀，例如：
+> * 其实如果使用的是`Thymeleaf`或`Spring MVC's JSP tag library`，甚至可以不添加上面的隐藏域，视图引擎会在渲染时自动加上"_csrf"字段 。以Thymeleaf为例、唯一要做的是，表单中至少有一个字段使用了Thymeleaf的`th:`前缀，例如：
 >
 >     ~~~html
 >     <form method="POST" th:action="@{/login}" id="loginForm">
@@ -644,23 +650,24 @@ Demo项目
 > ~~~java
 > @Configuration
 > public class SecurityConfig {
->       ...
->       @Bean
->       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
->         return http
->             .authorizeRequests()
->             .mvcMatchers("/design", "/orders").hasRole("USER")
->             // "/admin/**"只开放给具有ADMIN权限的用户
->             .antMatchers(HttpMethod.POST, "/admin/**").access("hasRole('ADMIN')")
->             .anyRequest().permitAll()
->             .and().formLogin().loginPage("/login")
->             .and()
->             .logout()
->             .logoutSuccessUrl("/") 
->             .and().csrf().ignoringAntMatchers("/h2-console/**") // Make H2-Console non-secured; for debug purposes
->             .and().headers().frameOptions().sameOrigin() // Allow pages to be loaded in frames from the same origin; needed for H2-Console
->             .and().build();
->       }
+>    ...
+>    @Bean
+>    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+>      return http
+>          .authorizeRequests()
+>          // design，orders路径开发给具有USER权限的用户
+>          .mvcMatchers("/design", "/orders").hasRole("USER")
+>          // admin路径只开放给具有ADMIN权限的用户
+>          .antMatchers(HttpMethod.POST, "/admin/**").access("hasRole('ADMIN')")
+>          .anyRequest().permitAll()
+>          .and().formLogin().loginPage("/login")
+>          .and()
+>          .logout()
+>          .logoutSuccessUrl("/") 
+>          .and().csrf().ignoringAntMatchers("/h2-console/**") // Make H2-Console non-secured; for debug purposes
+>          .and().headers().frameOptions().sameOrigin() // Allow pages to be loaded in frames from the same origin; needed for H2-Console
+>          .and().build();
+>    }
 > }
 > ~~~
 >
@@ -733,7 +740,7 @@ Demo项目
 > }
 > ~~~
 
-#### (2) 获取当前用户并设置给TacoOrder对象
+### (2) 获取当前用户并设置给TacoOrder对象
 
 > [/src/main/java/.../web/OrderController.java](../ch05/taco-cloud-sfc/src/main/java/tacos/web/OrderController.java)
 >
@@ -742,21 +749,25 @@ Demo项目
 > ~~~java
 > @PostMapping
 > public String processOrder(
->       //@Valid注解开启对Order内字段的校验 
->       @Valid Order order, Errors errors, 
->       SessionStatus sessionStatus, 
->       //@AuthenticationPrincipal让框架注入当前用户
->       @AuthenticationPrincipal User user) {
->         // @Valid校验异常时，返回到orderForm并提示设置在Order类中的错误提示信息，让用户修改
->         if (errors.hasErrors()) {
->           return "orderForm";
->         }
->         // 把当前用户设置在Order对象中
->         order.setUser(user);
->         orderRepo.save(order);
->         // 标记session为completed并容许清理session数据
->         sessionStatus.setComplete();
->         return "redirect:/";
+> 	// @Valid注解开启对Order内字段的校验 
+> 	@Valid 
+> 	Order order, 
+>     Errors errors, 
+> 	SessionStatus sessionStatus, 
+> 	// @AuthenticationPrincipal让框架注入当前用户
+> 	@AuthenticationPrincipal 
+>     User user
+> ) {
+>      // @Valid校验异常时，返回到orderForm并提示设置在Order类中的错误提示信息，让用户修改
+>      if (errors.hasErrors()) {
+> 		return "orderForm";
+>      }
+>      // 把当前用户设置在Order对象中
+>      order.setUser(user);
+>      orderRepo.save(order);
+>      // 标记session为completed并容许清理session数据
+>      sessionStatus.setComplete();
+>      return "redirect:/";
 > }
 > ~~~
 >
@@ -795,9 +806,9 @@ Demo项目
 >     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 >     User user = (User) authentication.getPrincipal(); // 需要把Object转型为User对象 
 >     ~~~
->     
->* 使用`@AuthenticationPrincipal`对注解（上面例子所采用的方法），它是最干净的方法：
-> 
+>
+> * 使用`@AuthenticationPrincipal`对注解（上面例子所采用的方法），它是最干净的方法：
+>
 >    * 将security-specific code缩小到@AuthenticationPrincipal注解（想一想有一天Spring Security的内部实现变了）
 >     * 没有Object到User的转型，也不需要查数据库
 
