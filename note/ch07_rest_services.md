@@ -698,8 +698,8 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 > 		this.name = taco.getName();
 > 		this.createdAt = taco.getCreatedAt();
 > 		// this.ingredients = taco.getIngredients();
->         // 下一小节介绍
->         this.ingredients = ingredientAssembler.toCollectionModel(taco.getIngredients()); 
+>    		// 下一小节介绍
+>    		this.ingredients = ingredientAssembler.toCollectionModel(taco.getIngredients()); 
 > 	}
 > }
 > ~~~
@@ -786,9 +786,9 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 >
 > ~~~yml
 > spring:
->   data:
->     rest:
->       base-path: /api
+>   	data:
+>    		rest:
+>    			base-path: /api
 > ~~~
 >
 > 这样所有使用Spring Data REST生成的API，都统一放在了`/api`路径之下，例如
@@ -856,8 +856,8 @@ Hypermedia as the Engine of Application State（简称HATEOAS）
 >
 > ~~~json
 > "tacos" : {
->   "href" : "http://localhost:8080/api/tacos{?page,size,sort}",
->   "templated" : true
+>   	"href" : "http://localhost:8080/api/tacos{?page,size,sort}",
+>   	"templated" : true
 > },
 > ~~~
 

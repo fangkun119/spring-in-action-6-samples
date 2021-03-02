@@ -382,7 +382,7 @@
 #### (2) 用途
 
 > * 元数据声明是可选的，不添加程序也可以正常运行
-> * 但是如果不添加，某些IDE会报警，提示“unknow property taco”等
+> * 但是如果不添加，某些IDE会报警，提示“unknown property taco”等
 > * 并且添加之后
 >     * IDE可以识别诸如“taco.orders.pageSize”、"taco.discount.codes"之类的配置项
 >     * 在代码编写过程中 ，IDE可以给出提示
@@ -390,7 +390,7 @@
 
 ## 6.3  使用profile进行配置
 
-> 例如：
+> 例如
 >
 > * 在开发和调试时、使用嵌入式H2数据库，日志级别为DEBUG
 >

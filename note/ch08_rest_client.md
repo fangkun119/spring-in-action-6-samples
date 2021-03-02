@@ -172,9 +172,9 @@ Demo项目：[../ch08/](../ch08/)
 > 	ResponseEntity<Ingredient> responseEntity =
 > 		rest.getForEntity("http://localhost:8080/ingredients/{id}",
 > 						  Ingredient.class, ingredientId);
->     // 在日志中输出来自response header的数据
+>    	// 在日志中输出来自response header的数据
 > 	log.info("Fetched time: " + responseEntity.getHeaders().getDate());
->     // 返回来自response body的数据
+>    	// 返回来自response body的数据
 > 	return responseEntity.getBody();
 > }
 > ~~~
@@ -276,7 +276,7 @@ Demo项目：[../ch08/](../ch08/)
 >             MediaTypes.HAL_JSON);
 > 		return traverson;
 > 	}
->     ...
+>    	...
 > }
 > ~~~
 
