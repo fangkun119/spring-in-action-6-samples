@@ -1,0 +1,18 @@
+package tacos;
+
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Data;
+
+@Data
+public class Taco {
+
+  private String name;
+
+  private List<Ingredient> ingredients = new ArrayList<>();
+  
+  public void addIngredient(Ingredient ingredient) {
+    this.ingredients.add(ingredient);
+  }
+
+}
